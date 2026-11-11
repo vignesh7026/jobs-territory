@@ -5,6 +5,10 @@ import { AFTER_LOGIN, safeNext } from "@/lib/auth/guard";
 import { createClient } from "@/lib/supabase/server";
 import { fieldErrors, loginSchema, registerSchema } from "@/lib/validation/auth";
 
+const UNREACHABLE = "We could not reach the sign-in service. Check that the database is running (npm run db:start), then try again.";
+/** supabase-js returns network failures as errors with no HTTP status, not as exceptions. */
+const unreachable = (e: { status?: number; name?: string }) => e.name === "AuthRetryableFetchError" || e.status === 0 || e.status === undefined;
+
 export interface AuthFormState {
   message?: string;
   fieldErrors?: Record<string, string>;
@@ -20,6 +24,7 @@ export async function login(_prev: AuthFormState | undefined, formData: FormData
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
+    if (unreachable(error)) return { message: UNREACHABLE, values: { email: raw.email } };
     const message =
       error.status === 429
         ? "Too many attempts. Wait a minute and try again."
@@ -48,6 +53,7 @@ export async function register(_prev: AuthFormState | undefined, formData: FormD
     options: { data: { full_name: parsed.data.fullName } },
   });
   if (error) {
+    if (unreachable(error)) return { message: UNREACHABLE, values };
     if (error.code === "user_already_exists" || error.code === "email_exists") {
       return { fieldErrors: { email: "An account with this email already exists. Sign in instead." }, values };
     }
