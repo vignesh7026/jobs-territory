@@ -5,6 +5,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { AdminStatusPanel } from "@/components/admin/status-panel";
 import { EventLog } from "@/components/applications/event-log";
 import { FollowUpPanel } from "@/components/applications/follow-up-panel";
+import { NegotiationPanel } from "@/components/applications/negotiation-panel";
 import { HealthMeter } from "@/components/applications/health-meter";
 import { applicationHealth } from "@/lib/applications/health";
 import { StatusBadge } from "@/components/applications/status-badge";
@@ -15,6 +16,8 @@ import { Card } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth/session";
 import { getApplication } from "@/lib/applications/queries";
 import { formatDate, timeAgo } from "@/lib/format";
+import { describeRange } from "@/lib/negotiate";
+import { getMarketSample } from "@/lib/negotiate-queries";
 
 export const metadata: Metadata = { title: "Application" };
 
@@ -30,6 +33,7 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
 
   const canWithdraw = isOwner && app.undoable;
   const health = isOwner ? applicationHealth(app.status, app.updatedAt) : null;
+  const market = isOwner && app.status === "offered" ? await getMarketSample(app.job.id) : null;
 
   return (
     <section className="container py-6 md:py-8">
@@ -80,6 +84,13 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
               <div className="mt-4 border-t border-border pt-4">
                 <FollowUpPanel applicationId={app.id} urgent={health.health !== "on_track"} />
               </div>
+            </Card>
+          )}
+
+          {isOwner && app.status === "offered" && (
+            <Card className="p-5">
+              <h2 className="mb-3 text-base">You have an offer</h2>
+              <NegotiationPanel applicationId={app.id} rangeText={market ? describeRange(market.range, market.monthly) : null} sample={market?.range.sample ?? 0} />
             </Card>
           )}
 

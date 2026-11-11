@@ -36,6 +36,7 @@ export const schemas = {
   summary: z.object({ lines: z.tuple([line(170), line(170), line(170)]) }),
   coverLetter: z.object({ text: z.string().trim().min(200).max(2600) }),
   followUp: z.object({ subject: z.string().trim().min(4).max(110), body: z.string().trim().min(80).max(1400) }),
+  negotiate: z.object({ subject: z.string().trim().min(4).max(110), body: z.string().trim().min(80).max(1400) }),
 };
 export type MatchAi = z.infer<typeof schemas.match>;
 export type GapAi = z.infer<typeof schemas.gap>;
@@ -86,6 +87,10 @@ export const prompts = {
   followUp: (a: { job: AiJob; status: ApplicationStatus; appliedOn: string; daysSinceUpdate: number; firstName: string }) => ({
     maxTokens: 700,
     user: `Write a polite follow-up email from a candidate who applied ${a.daysSinceUpdate >= 14 ? "a while ago" : "recently"} and has not heard back. 80 to 140 words. Mention the role and the application date, restate interest in one sentence, ask whether there is any update or anything else needed. Do not pressure or complain. Sign off with the first name.\nShape: {"subject":"...","body":"..."}\n${data({ job: { title: a.job.title, company: a.job.company }, status: STATUS_LABELS[a.status], appliedOn: a.appliedOn, daysSinceLastUpdate: a.daysSinceUpdate, firstName: a.firstName })}`,
+  }),
+  negotiate: (a: { job: { title: string; company: string }; firstName: string; offer: string; range: string | null }) => ({
+    maxTokens: 700,
+    user: `Write a polite, confident reply to a job offer from the candidate. They want to accept in principle but ask whether there is flexibility on compensation. 100 to 160 words. Thank them, show enthusiasm for the role, ask the question once and respectfully, and offer a short call. If a market range is given you may refer to it as listings the candidate has seen; use ONLY the figures provided and invent no other numbers, competing offers or deadlines. If an offer figure is given, acknowledge it without arguing. Sign off with the first name.\nShape: {"subject":"...","body":"..."}\n${data({ job: a.job, firstName: a.firstName, offerFigure: a.offer || null, marketRange: a.range })}`,
   }),
 };
 

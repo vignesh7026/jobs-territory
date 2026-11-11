@@ -8,6 +8,8 @@ import { applicationHealth } from "@/lib/applications/health";
 import { getApplication } from "@/lib/applications/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
+import { describeRange, plainNegotiation } from "@/lib/negotiate";
+import { getMarketSample } from "@/lib/negotiate-queries";
 
 /**
  * POST /api/ai/:kind   kind = match | gap | summary | cover-letter | follow-up
@@ -15,11 +17,12 @@ import { computeMatch, fallbackExplanation } from "@/lib/match";
  * "ai", "cache" or "fallback"; if the model is down the plain, non-AI result comes back instead of an error.
  * 401 signed out, 404 unknown job/application, 422 not applicable, 429 too many requests.
  */
-const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up"] as const;
+const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate"] as const;
 type Kind = (typeof KINDS)[number];
 
 const jobBody = z.object({ jobId: z.string().refine(isUuid, "Invalid job id") });
 const appBody = z.object({ applicationId: z.string().refine(isUuid, "Invalid application id") });
+const negotiateBody = appBody.extend({ offer: z.string().trim().max(40).optional() });
 const reply = (data: unknown, source: string) => NextResponse.json({ data, source }, { headers: { "Cache-Control": "private, no-store" } });
 const err = (message: string, status: number) => NextResponse.json({ error: message }, { status });
 
@@ -52,6 +55,21 @@ export async function POST(request: Request, ctx: RouteContext<"/api/ai/[kind]">
       const input = { job: job.ai, status: app.status, appliedOn: app.createdAt, daysSinceUpdate: quietDays, firstName: profile.ai.firstName };
       const p = prompts.followUp(input);
       const r = await ai({ kind: "follow-up", jobId: job.id, inputKey: `${app.id}:${app.status}:${app.updatedAt.slice(0, 10)}`, schema: schemas.followUp, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: plainFollowUp(input) });
+      return reply(r.data, r.source);
+    }
+
+    case "negotiate": {
+      const parsed = negotiateBody.safeParse(body);
+      if (!parsed.success) return err("Invalid request.", 400);
+      const app = await getApplication(parsed.data.applicationId);
+      if (!app || app.candidateId !== user.id) return err("Application not found.", 404);
+      if (app.status !== "offered") return err("A negotiation draft is only available once you have an offer.", 422);
+      const [job, profile, sample] = await Promise.all([loadJob(app.job.id), loadProfile(user.id), getMarketSample(app.job.id)]);
+      if (!job || !profile) return err("Could not load the details for this draft.", 404);
+      const range = sample ? describeRange(sample.range, sample.monthly) : null;
+      const input = { job: { title: job.ai.title, company: job.ai.company }, firstName: profile.ai.firstName, offer: parsed.data.offer ?? "", range };
+      const p = prompts.negotiate(input);
+      const r = await ai({ kind: "negotiate", jobId: job.id, inputKey: `${user.id}:${app.id}:${input.offer}:${range ?? ""}`, schema: schemas.negotiate, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: plainNegotiation({ firstName: input.firstName, offer: input.offer, range: input.range, jobTitle: job.ai.title, company: job.ai.company }) });
       return reply(r.data, r.source);
     }
 
