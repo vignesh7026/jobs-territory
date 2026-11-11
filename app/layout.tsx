@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/shell/navbar";
 import { Toaster } from "@/components/shell/toaster";
 import { ThemeScript } from "@/components/shell/theme-script";
+import { getCurrentUser } from "@/lib/auth/session";
 
 const manrope = Manrope({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-manrope", display: "swap" });
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-inter", display: "swap" });
@@ -20,7 +21,8 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const user = await getCurrentUser();
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
@@ -31,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <Toaster>
-          <Navbar />
+          <Navbar user={user ? { fullName: user.fullName, email: user.email, role: user.role } : null} />
           <main id="main" className="flex-1">
             {children}
           </main>

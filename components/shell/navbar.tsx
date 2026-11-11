@@ -4,19 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { logout } from "@/app/(auth)/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
+import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { href: "/jobs", label: "Jobs" },
+const publicLinks = [{ href: "/jobs", label: "Jobs" }];
+const memberLinks = [
   { href: "/applications", label: "Applications" },
   { href: "/saved", label: "Saved" },
 ];
 
-export function Navbar() {
+export function Navbar({ user }: { user: MenuUser | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const links = user ? [...publicLinks, ...memberLinks] : publicLinks;
 
   return (
     <header className="navbar-surface sticky top-0 z-40 border-b border-border">
@@ -46,12 +49,21 @@ export function Navbar() {
 
         <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
-          <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }), "hidden md:inline-flex")}>
-            Sign in
-          </Link>
-          <Link href="/register" className={cn(buttonVariants({ variant: "primary" }), "hidden md:inline-flex")}>
-            Create account
-          </Link>
+          {user ? (
+            <div className="hidden md:block">
+              <UserMenu user={user} />
+            </div>
+          ) : (
+            <>
+              <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }), "hidden md:inline-flex")}>
+                Sign in
+              </Link>
+              {/* Secondary on purpose: the page's own call to action is the one primary button in view. */}
+              <Link href="/register" className={cn(buttonVariants({ variant: "secondary" }), "hidden md:inline-flex")}>
+                Create account
+              </Link>
+            </>
+          )}
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-nav" aria-label={open ? "Close menu" : "Open menu"}>
             {open ? <X /> : <Menu />}
           </Button>
@@ -65,14 +77,32 @@ export function Navbar() {
               {l.label}
             </Link>
           ))}
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            <Link href="/login" onClick={() => setOpen(false)} className={buttonVariants({ variant: "secondary" })}>
-              Sign in
-            </Link>
-            <Link href="/register" onClick={() => setOpen(false)} className={buttonVariants({ variant: "primary" })}>
-              Create account
-            </Link>
-          </div>
+          {user ? (
+            <>
+              <Link href="/profile" onClick={() => setOpen(false)} className="flex h-11 items-center rounded-md px-3 text-base font-medium hover:bg-primary-soft">
+                Profile
+              </Link>
+              {user.role === "admin" && (
+                <Link href="/admin/applications" onClick={() => setOpen(false)} className="flex h-11 items-center rounded-md px-3 text-base font-medium hover:bg-primary-soft">
+                  Admin
+                </Link>
+              )}
+              <form action={logout} className="mt-2">
+                <Button type="submit" variant="secondary" className="w-full">
+                  Sign out ({user.fullName})
+                </Button>
+              </form>
+            </>
+          ) : (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Link href="/login" onClick={() => setOpen(false)} className={buttonVariants({ variant: "secondary" })}>
+                Sign in
+              </Link>
+              <Link href="/register" onClick={() => setOpen(false)} className={buttonVariants({ variant: "secondary" })}>
+                Create account
+              </Link>
+            </div>
+          )}
         </nav>
       )}
     </header>

@@ -24,7 +24,7 @@ sql.push(
 );
 
 // Demo auth users (password is bcrypt-hashed by the database). Token columns must be '' not null for GoTrue.
-for (const [role, u] of Object.entries(demo)) {
+for (const u of Object.values(demo)) {
   sql.push(`insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, recovery_token, email_change, email_change_token_new)
 values ('00000000-0000-0000-0000-000000000000', ${q(u.id)}, 'authenticated', 'authenticated', ${q(u.email)}, crypt(${q(u.password)}, gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}'::jsonb, ${json({ full_name: u.name })}, now(), now(), '', '', '', '');`);
   sql.push(`insert into auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
