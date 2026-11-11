@@ -1,69 +1,39 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { MapPin, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export default function Home() {
+// Home. Left-aligned headline, one supporting line, the search bar. The 3D hero is added in a later commit.
+export default function HomePage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <section className="container py-12 md:py-20">
+      <div className="max-w-2xl">
+        <h1 className="text-3xl md:text-4xl">Find a role, see how you match, and track every application.</h1>
+        <p className="mt-4 max-w-prose text-base text-muted">
+          Each listing shows the pay, the skills it asks for and where you fall short, so you can decide before you apply.
+        </p>
+
+        {/* Plain GET form: works without JavaScript and produces a shareable URL. */}
+        <form action="/jobs" method="get" role="search" className="mt-8 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+          <div className="grid gap-1.5">
+            <Label htmlFor="q">Role or skill</Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+              <Input id="q" name="q" placeholder="Backend developer, Figma" className="pl-9" autoComplete="off" />
+            </div>
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="location">Location</Label>
+            <div className="relative">
+              <MapPin className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+              <Input id="location" name="location" placeholder="Coimbatore, Remote" className="pl-9" autoComplete="off" />
+            </div>
+          </div>
+          <Button type="submit" variant="primary" className="self-end sm:h-10">
+            Search jobs
+          </Button>
+        </form>
+      </div>
+    </section>
   );
 }
