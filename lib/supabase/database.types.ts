@@ -225,6 +225,9 @@ isOneToOne: false
 { Args: { "p_levels"?: (Database["public"]['Enums']["job_level"])[],"p_limit"?: number,"p_location"?: string,"p_modes"?: (Database["public"]['Enums']["work_mode"])[],"p_offset"?: number,"p_q"?: string,"p_sort"?: string,"p_types"?: (Database["public"]['Enums']["job_type"])[] }; Returns: {
               "job_id": string,"total": number
             }[]
+                           },
+"undo_application":
+{ Args: { "p_application_id": string }; Returns: undefined
                            }
           }
           Enums: {

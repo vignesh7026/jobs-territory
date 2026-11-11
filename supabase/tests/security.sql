@@ -93,6 +93,25 @@ select pg_temp.expect_error($$insert into public.applications (job_id, cover_not
 select pg_temp.expect_error($$insert into public.applications (candidate_id, job_id) select '11111111-1111-4111-8111-111111111111', id from public.jobs where slug = 'fraud-analyst'$$, '42501', 'cannot apply on behalf of someone else');
 select pg_temp.reset();
 
+-- undo: only the owner, only while still 'applied' and recent
+select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
+insert into public.applications (job_id) select id from public.jobs where slug = 'fraud-analyst';
+select pg_temp.check_that((select count(*) from public.applications) = 2, 'second application created');
+select pg_temp.reset();
+-- the id of the other candidate's application, captured while we can still see it (RLS hides it from the demo candidate)
+create temp table t_other_app as select id from public.applications where candidate_id = '33333333-3333-4333-8333-333333333333' order by created_at desc limit 1;
+grant select on t_other_app to authenticated;
+select pg_temp.act_as('11111111-1111-4111-8111-111111111111');
+select pg_temp.expect_error($$select public.undo_application((select id from t_other_app))$$, 'P0002', 'another candidate cannot undo my application');
+select pg_temp.expect_error($$select public.undo_application(a.id) from public.applications a join public.jobs j on j.id = a.job_id where j.slug = 'backend-engineer-lending'$$, '22023', 'a shortlisted application cannot be undone');
+select pg_temp.reset();
+select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
+select public.undo_application(a.id) from public.applications a join public.jobs j on j.id = a.job_id where j.slug = 'fraud-analyst';
+select pg_temp.check_that((select count(*) from public.applications) = 1, 'undo removes a fresh application');
+select pg_temp.check_that((select count(*) from public.application_events) = 1, 'and its timeline events go with it');
+select pg_temp.expect_error($$delete from public.applications$$, '42501', 'candidates still cannot delete applications directly');
+select pg_temp.reset();
+
 -- profile versioning ----------------------------------------------------
 select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
 select pg_temp.check_that((select profile_version from public.profiles) = 1, 'profile starts at version 1');
