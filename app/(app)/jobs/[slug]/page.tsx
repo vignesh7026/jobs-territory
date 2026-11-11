@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowLeftRight, Building2, Clock, Laptop, MapPin } from "lucide-react";
 import { ApplyController } from "@/components/jobs/apply-controller";
+import { GapCard, MatchCard, MatchSignIn } from "@/components/match/match-card";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { daysUntil, formatSalary, timeAgo } from "@/lib/format";
 import { getJobBySlug, getMyApplication, getMyResumeName } from "@/lib/jobs/detail";
 import { LEVEL_LABELS, MODE_LABELS, TYPE_LABELS, type WorkMode } from "@/lib/jobs/filters";
+import { computeMatch, fallbackExplanation } from "@/lib/match";
+import { getMatchProfile } from "@/lib/profile/queries";
 
 const MODE_ICON: Record<WorkMode, React.ReactNode> = { onsite: <Building2 />, hybrid: <ArrowLeftRight />, remote: <Laptop /> };
 
@@ -40,6 +43,9 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
 
   const user = await getCurrentUser();
   const [application, resumeName] = user ? await Promise.all([getMyApplication(job.id), getMyResumeName(user.id)]) : [null, null];
+
+  const matchProfile = await getMatchProfile(user?.id ?? null);
+  const match = matchProfile ? computeMatch(matchProfile, { skills: job.skills, level: job.level, workMode: job.workMode, location: job.location, title: job.title }) : null;
 
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.currency, job.jobType);
   const closesInDays = daysUntil(job.closesAt);
@@ -122,6 +128,14 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
             resumeName={resumeName}
             initialApplication={application}
           />
+          {match ? (
+            <>
+              <MatchCard match={match} explanation={fallbackExplanation(match, job.skills.length)} jobSkillCount={job.skills.length} />
+              <GapCard match={match} />
+            </>
+          ) : (
+            <MatchSignIn href={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
+          )}
           <Card className="p-5">
             <h2 className="text-base">About {c.name}</h2>
             <p className="mt-1 text-xs text-muted">

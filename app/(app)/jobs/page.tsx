@@ -12,6 +12,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { filtersHref, hasActiveFilters, parseFilters, type JobFilters } from "@/lib/jobs/filters";
 import { searchJobs } from "@/lib/jobs/queries";
+import { getCurrentUser } from "@/lib/auth/session";
+import { computeMatch } from "@/lib/match";
+import { getMatchProfile } from "@/lib/profile/queries";
 
 export async function generateMetadata(props: PageProps<"/jobs">): Promise<Metadata> {
   const { q } = parseFilters(await props.searchParams);
@@ -24,6 +27,11 @@ export default async function JobsPage(props: PageProps<"/jobs">) {
 
   // Asked for a page past the end (an old link, say): go to the last real page, keeping the filters.
   if (result.page !== filters.page) redirect(filtersHref({ ...filters, page: result.page }));
+
+  // Signed-in candidates see how each result matches their skills.
+  const user = await getCurrentUser();
+  const mp = await getMatchProfile(user?.id ?? null);
+  const matches = mp ? Object.fromEntries(result.jobs.map((j) => [j.id, computeMatch(mp, { skills: j.skills, level: j.level, workMode: j.workMode, location: j.location, title: j.title }).score])) : undefined;
 
   const cleared: JobFilters = { ...filters, q: "", location: "", types: [], modes: [], levels: [], page: 1, sort: "newest" };
 
@@ -45,7 +53,7 @@ export default async function JobsPage(props: PageProps<"/jobs">) {
             <ResultsToolbar total={result.total} />
             {result.jobs.length > 0 ? (
               <>
-                <Results jobs={result.jobs} />
+                <Results jobs={result.jobs} matches={matches} />
                 <Pagination filters={filters} page={result.page} pageCount={result.pageCount} />
               </>
             ) : (

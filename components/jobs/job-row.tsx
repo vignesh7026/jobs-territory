@@ -23,7 +23,7 @@ export function CompanyMark({ name, className = "size-11" }: { name: string; cla
  * One result. A dense row, not a card: the list is meant to be scanned.
  * The first eight rows fade in with a 40 ms stagger; later ones appear immediately.
  */
-export function JobRow({ job, index }: { job: JobListItem; index: number }) {
+export function JobRow({ job, index, match }: { job: JobListItem; index: number; match?: number }) {
   const reduce = useReducedMotion();
   const closing = daysUntil(job.closesAt);
 
@@ -67,6 +67,11 @@ export function JobRow({ job, index }: { job: JobListItem; index: number }) {
         <div className="col-span-2 flex items-baseline justify-between gap-4 border-t border-border pt-2 sm:col-span-1 sm:block sm:border-0 sm:pt-0 sm:text-right">
           <p className="text-sm font-medium tabular-nums">{formatSalary(job.salaryMin, job.salaryMax, job.currency, job.jobType)}</p>
           <p className="text-xs text-muted sm:mt-1">{timeAgo(job.postedAt)}</p>
+          {match !== undefined && (
+            <p className="text-xs font-medium tabular-nums text-primary sm:mt-1" title="Share of the listed skills that are on your profile">
+              {match}% skills match
+            </p>
+          )}
         </div>
       </Link>
     </motion.li>
