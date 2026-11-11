@@ -9,6 +9,7 @@ import { EducationList, ExperienceList, type EducationValue, type ExperienceValu
 import { ResumeCard, type ResumeState } from "@/components/profile/resume-card";
 import { SkillInput } from "@/components/profile/skill-input";
 import { StrengthMeter } from "@/components/profile/strength-meter";
+import { PortfolioScan } from "@/components/profile/portfolio-scan";
 import { VoiceBuilder } from "@/components/profile/voice-builder";
 import { useToast } from "@/components/shell/toaster";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export interface ProfileValues {
   phone: string;
   location: string;
   headline: string;
+  githubUsername: string;
   summary: string;
   skills: string[];
   experience: ExperienceValue[];
@@ -122,6 +124,14 @@ export function ProfileEditor({ initial, initialResume, email, plan }: { initial
             <Link href="/career#plan" className="mt-2 inline-flex min-h-9 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">Open the plan</Link>
           </Card>
         )}
+        <PortfolioScan
+          username={values.githubUsername}
+          skills={values.skills}
+          onAdd={(added) => {
+            setValues((v) => ({ ...v, skills: mergeSkills(v.skills, added) }));
+            toast({ title: `${added.length} ${added.length === 1 ? "skill" : "skills"} added`, description: "Review them, then press Save changes." });
+          }}
+        />
         <VoiceBuilder
           onApply={(pick) => {
             setValues((v) => ({ ...v, headline: pick.headline ?? v.headline, summary: pick.summary ?? v.summary, skills: mergeSkills(v.skills, pick.skills) }));
@@ -147,6 +157,9 @@ export function ProfileEditor({ initial, initialResume, email, plan }: { initial
             </FormField>
             <FormField id="phone" label="Phone" error={errorFor("phone")}>
               {(c) => <Input {...c} type="tel" value={values.phone} onChange={(e) => update("phone", e.target.value)} onBlur={() => touch("phone")} autoComplete="tel" placeholder="+91 98430 27719" />}
+            </FormField>
+            <FormField id="githubUsername" label="GitHub username" hint="Optional. Lets us suggest skills from your public projects." error={errorFor("githubUsername")}>
+              {(c) => <Input {...c} value={values.githubUsername} maxLength={39} onChange={(ev) => update("githubUsername", ev.target.value)} onBlur={() => touch("githubUsername")} autoComplete="off" placeholder="octocat" />}
             </FormField>
             <FormField id="summary" label="Summary" error={errorFor("summary")} className="sm:col-span-2" hint={`${values.summary.length} of 2000 characters`}>
               {(c) => <Textarea {...c} rows={5} value={values.summary} onChange={(e) => update("summary", e.target.value)} onBlur={() => touch("summary")} placeholder="What you build, what you have shipped, and what you want to do next." />}

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isGithubUsername } from "@/lib/portfolio";
 import { canonicalSkill } from "@/lib/skills";
 
 const optionalText = (max: number, label: string) =>
@@ -50,6 +51,12 @@ export const profileSchema = z.object({
   location: optionalText(120, "Location"),
   headline: optionalText(160, "Headline"),
   summary: optionalText(2000, "Summary"),
+  githubUsername: z
+    .string()
+    .trim()
+    .max(39, "GitHub usernames are at most 39 characters")
+    .refine((u) => u === "" || isGithubUsername(u), "Use just the username, like octocat")
+    .default(""),
   skills: skillsSchema,
   experience: z.array(experienceSchema).max(15, "You can add up to 15 roles"),
   education: z.array(educationSchema).max(10, "You can add up to 10 entries"),

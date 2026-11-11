@@ -21,6 +21,7 @@ export default async function ProfilePage() {
     phone: p?.phone ?? "",
     location: p?.location ?? "",
     headline: p?.headline ?? "",
+    githubUsername: p?.github_username ?? "",
     summary: p?.summary ?? "",
     skills: p?.skills ?? [],
     experience: rows(p?.experience).map((e) => ({ title: text(e.title), company: text(e.company), period: text(e.period), description: text(e.description) })),

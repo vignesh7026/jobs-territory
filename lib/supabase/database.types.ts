@@ -151,14 +151,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"education": NonNullable<Json>,"experience": NonNullable<Json>,"full_name": string,"headline": string | null,"id": string,"location": string | null,"phone": string | null,"profile_version": number,"resume_path": string | null,"role": Database["public"]['Enums']["app_role"],"skills": (string)[],"summary": string | null,"updated_at": string
+                    "created_at": string,"education": NonNullable<Json>,"experience": NonNullable<Json>,"full_name": string,"github_username": string | null,"headline": string | null,"id": string,"location": string | null,"phone": string | null,"profile_version": number,"resume_path": string | null,"role": Database["public"]['Enums']["app_role"],"skills": (string)[],"summary": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"education"?: NonNullable<Json>,"experience"?: NonNullable<Json>,"full_name"?: string,"headline"?: string | null,"id": string,"location"?: string | null,"phone"?: string | null,"profile_version"?: number,"resume_path"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"skills"?: (string)[],"summary"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"education"?: NonNullable<Json>,"experience"?: NonNullable<Json>,"full_name"?: string,"github_username"?: string | null,"headline"?: string | null,"id": string,"location"?: string | null,"phone"?: string | null,"profile_version"?: number,"resume_path"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"skills"?: (string)[],"summary"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"education"?: NonNullable<Json>,"experience"?: NonNullable<Json>,"full_name"?: string,"headline"?: string | null,"id"?: string,"location"?: string | null,"phone"?: string | null,"profile_version"?: number,"resume_path"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"skills"?: (string)[],"summary"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"education"?: NonNullable<Json>,"experience"?: NonNullable<Json>,"full_name"?: string,"github_username"?: string | null,"headline"?: string | null,"id"?: string,"location"?: string | null,"phone"?: string | null,"profile_version"?: number,"resume_path"?: string | null,"role"?: Database["public"]['Enums']["app_role"],"skills"?: (string)[],"summary"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
