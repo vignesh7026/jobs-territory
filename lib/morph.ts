@@ -24,13 +24,13 @@ function clearNames() {
   });
 }
 
-/** Resolves once the app has navigated to `pathname` and painted the destination (or after a safety timeout).
+/** Resolves once the app has navigated to `pathname` and painted the destination (or after a 1 s safety timeout).
  *  Timers, not requestAnimationFrame: a stalled frame loop must never leave a view transition (and so rendering) hanging. */
 function arrived(pathname: string, ready: () => boolean): Promise<void> {
   return new Promise((resolve) => {
     const start = performance.now();
     const tick = () => {
-      if ((location.pathname === pathname && ready()) || performance.now() - start > 2500) setTimeout(resolve, 50);
+      if ((location.pathname === pathname && ready()) || performance.now() - start > 1000) setTimeout(resolve, 50);
       else setTimeout(tick, 16);
     };
     tick();
