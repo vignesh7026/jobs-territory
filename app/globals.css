@@ -91,3 +91,10 @@
 
 /* One consistent Lucide stroke width across the product. */
 .lucide { stroke-width: 1.75; }
+
+/* ---- Shared-element morph between a job row and its page (browser View Transitions API, see lib/morph.ts) ----
+   The route fade/rise is Framer (page-transition.tsx). Unsupported browsers and reduced motion just navigate. */
+::view-transition-group(job-mark),
+::view-transition-group(job-title) { animation-duration: 300ms; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: 200ms; }

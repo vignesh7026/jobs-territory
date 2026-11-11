@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowLeftRight, Building2, Clock, Laptop, MapPin } from "lucide-react";
+import { ArrowLeftRight, Building2, Clock, Laptop, MapPin } from "lucide-react";
 import { UpgradableLines } from "@/components/ai/upgradable-lines";
 import { ApplyController } from "@/components/jobs/apply-controller";
 import { plainSummary } from "@/lib/ai/features";
 import { GapCard, MatchCard, MatchSignIn } from "@/components/match/match-card";
 import { CompanyMark } from "@/components/jobs/job-row";
+import { BackLink } from "@/components/jobs/back-link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -60,18 +61,18 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
 
   return (
     <section className="container pb-28 pt-6 lg:pb-12 lg:pt-8">
-      <Link href="/jobs" className="inline-flex h-11 items-center gap-1.5 text-sm text-muted transition-colors duration-fast hover:text-text md:h-9">
-        <ArrowLeft className="size-4" aria-hidden="true" /> All jobs
-      </Link>
+      <BackLink jobId={job.id} />
 
       <div className="mt-2 grid items-start gap-10 lg:grid-cols-[1fr_22rem]">
-        <article className="max-w-prose">
+        <article className="max-w-prose" data-job-page>
           <header>
             <div className="flex items-center gap-3">
-              <CompanyMark name={c.name} className="size-12" />
+              <CompanyMark name={c.name} className="size-12" style={{ viewTransitionName: "job-mark" }} />
               <p className="text-base font-medium">{c.name}</p>
             </div>
-            <h1 className="mt-4 text-3xl md:text-4xl">{job.title}</h1>
+            <h1 className="mt-4 text-3xl md:text-4xl" style={{ viewTransitionName: "job-title" }}>
+              {job.title}
+            </h1>
 
             <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
               <span className="inline-flex items-center gap-1">

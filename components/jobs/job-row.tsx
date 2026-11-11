@@ -5,6 +5,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeftRight, Building2, Clock, Laptop, MapPin } from "lucide-react";
 import { CompareToggle } from "@/components/compare/compare-toggle";
 import { SaveButton } from "@/components/saved/save-button";
+import { useRouter } from "next/navigation";
+import { Tilt } from "@/components/jobs/tilt";
+import { MORPH_JOB_ATTR, VT_NAMES, morphToJob } from "@/lib/morph";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/lib/motion";
 import { LEVEL_LABELS, MODE_LABELS, TYPE_LABELS, type WorkMode } from "@/lib/jobs/filters";
@@ -13,9 +16,9 @@ import type { JobListItem } from "@/lib/jobs/queries";
 
 const MODE_ICON: Record<WorkMode, React.ReactNode> = { onsite: <Building2 />, hybrid: <ArrowLeftRight />, remote: <Laptop /> };
 
-export function CompanyMark({ name, className = "size-11" }: { name: string; className?: string }) {
+export function CompanyMark({ name, className = "size-11", ...rest }: { name: string; className?: string } & React.ComponentProps<"span">) {
   return (
-    <span aria-hidden="true" className={`grid shrink-0 place-items-center rounded-md border border-border bg-bg font-heading text-base font-bold text-muted ${className}`}>
+    <span aria-hidden="true" {...rest} className={`grid shrink-0 place-items-center rounded-md border border-border bg-bg font-heading text-base font-bold text-muted ${className}`}>
       {name.charAt(0).toUpperCase()}
     </span>
   );
@@ -27,25 +30,33 @@ export function CompanyMark({ name, className = "size-11" }: { name: string; cla
  */
 export function JobRow({ job, index, match, saved, signedIn }: { job: JobListItem; index: number; match?: number; saved?: boolean; signedIn?: boolean }) {
   const reduce = useReducedMotion();
+  const router = useRouter();
   const closing = daysUntil(job.closesAt);
+  // Coming back from this job's page: name this row so the page's logo and title morph into it.
+  const morphBack = typeof document !== "undefined" && document.documentElement.getAttribute(MORPH_JOB_ATTR) === job.id;
 
   return (
     <motion.li
       className="relative"
+      data-job-row={job.id}
       layout={!reduce}
       initial={{ opacity: 0, y: reduce ? 0 : 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ ...t.base, delay: index < 8 ? index * 0.04 : 0 }}
     >
+      <Tilt>
       <Link
         href={`/jobs/${job.slug}`}
-        className="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-lg border border-border bg-surface p-4 transition-[transform,box-shadow] duration-base ease-out hover:-translate-y-0.5 hover:shadow-soft sm:grid-cols-[auto_1fr_auto]"
+        onClick={(e) => morphToJob(e, router, `/jobs/${job.slug}`)}
+        className="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-lg border border-border bg-surface p-4 sm:grid-cols-[auto_1fr_auto]"
       >
-        <CompanyMark name={job.company.name} />
+        <CompanyMark name={job.company.name} data-vt-mark style={morphBack ? { viewTransitionName: VT_NAMES.MARK } : undefined} />
 
         <div className="min-w-0 pr-20 sm:pr-0">
-          <h2 className="text-base font-semibold leading-snug group-hover:text-primary">{job.title}</h2>
+          <h2 className="text-base font-semibold leading-snug group-hover:text-primary" data-vt-title style={morphBack ? { viewTransitionName: VT_NAMES.TITLE } : undefined}>
+            {job.title}
+          </h2>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
             <span className="font-medium text-text">{job.company.name}</span>
             <span aria-hidden="true">&middot;</span>
@@ -77,6 +88,7 @@ export function JobRow({ job, index, match, saved, signedIn }: { job: JobListIte
           )}
         </div>
       </Link>
+      </Tilt>
       {/* Outside the link on purpose: interactive controls cannot live inside an anchor. */}
       <div className="absolute right-2 top-2 flex">
         <CompareToggle item={{ id: job.id, title: job.title, company: job.company.name }} />
