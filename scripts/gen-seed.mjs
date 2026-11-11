@@ -1,6 +1,6 @@
 // Generates supabase/seed.sql from supabase/seed-data.mjs.   npm run seed:gen
 import { writeFileSync } from "node:fs";
-import { backgrounds, companies, contacts, jobs, sampleInsights, staleListings, vagueListing, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
+import { backgrounds, companies, contacts, employees, jobs, sampleInsights, staleListings, vagueListing, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
 
 const q = (s) => (s == null ? "null" : `'${String(s).replace(/'/g, "''")}'`);
 const arr = (a) => `array[${a.map(q).join(", ")}]::text[]`;
@@ -37,6 +37,10 @@ sql.push(
 for (const [slug, days, reposts] of staleListings) sql.push(`update public.jobs set first_posted_at = now() - interval '${days} days', repost_count = ${reposts} where slug = ${q(slug)};`);
 sql.push(`update public.jobs set summary = ${q(vagueListing.summary)}, responsibilities = ${arr(vagueListing.responsibilities)}, requirements = ${arr(vagueListing.requirements)}, skills = '{}' where slug = ${q(vagueListing.slug)};
 `);
+
+// Fictional employees for the referral finder.
+sql.push("insert into public.company_employees (company_id, full_name, title, college, grad_year) values");
+sql.push(employees.map(([co, name, title, college, year]) => `  ((select id from public.companies where slug = ${q(co)}), ${q(name)}, ${q(title)}, ${q(college)}, ${year})`).join(",\n") + ";\n");
 
 // Sample interview notes (clearly flagged is_sample).
 sql.push("insert into public.interview_insights (company_id, author_id, role_title, rounds, difficulty, outcome, experience, is_sample, created_at) values");

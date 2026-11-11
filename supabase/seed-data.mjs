@@ -318,3 +318,24 @@ export const sampleInsights = [
   ['brightwell-labs', 'Developer Advocate', 4, 3, 'rejected', 'Writing exercise, a recorded talk, and two interviews. They wanted evidence of a published track record; the feedback was kind and specific.'],
   ['orchard-cloud', 'Site Reliability Engineer', 5, 5, 'rejected', 'Five rounds including an on-call scenario and a Linux debugging session on a live box. Hard but fair, and the interviewers explained their reasoning afterwards.'],
 ];
+
+// Fictional employees, for the referral finder. [company slug, name, title, college, graduation year]
+export const employees = [
+  ['tamarind-health', 'Karthik Subramanian', 'Senior Frontend Engineer', 'PSG College of Technology', 2018],
+  ['tamarind-health', 'Janani Ravichandran', 'Product Designer', 'Anna University', 2019],
+  ['tamarind-health', 'Vimal Anand', 'QA Lead', 'SRM Institute of Science and Technology', 2016],
+  ['indus-ledger', 'Aishwarya Menon', 'Backend Engineer', 'PSG College of Technology', 2021],
+  ['indus-ledger', 'Rohit Nair', 'Engineering Manager', 'NIT Trichy', 2014],
+  ['indus-ledger', 'Deepa Krishnan', 'Data Analyst', 'Amrita Vishwa Vidyapeetham', 2020],
+  ['aster-mobility', 'Siddharth Rao', 'Mobile Lead', 'IIT Madras', 2013],
+  ['aster-mobility', 'Nandini Pillai', 'React Native Developer', 'PSG College of Technology', 2022],
+  ['brightwell-labs', 'Arjun Mehta', 'Staff Engineer', 'BITS Pilani', 2012],
+  ['brightwell-labs', 'Lavanya Iyer', 'Developer Advocate', 'Anna University', 2017],
+  ['orchard-cloud', 'Mohammed Faizal', 'Site Reliability Engineer', 'VIT Vellore', 2019],
+  ['orchard-cloud', 'Priyanka Das', 'Cloud Architect', 'PSG College of Technology', 2015],
+  ['quayside-payments', 'Gokul Raj', 'Backend Engineer', 'Government College of Technology, Coimbatore', 2020],
+  ['lattice-robotics', 'Harini Selvam', 'Robotics Software Engineer', 'PSG College of Technology', 2019],
+  ['lattice-robotics', 'Tarun Kapoor', 'ML Engineer', 'IIT Madras', 2018],
+  ['jobs-territory', 'Divya Raghunathan', 'Talent Partner', 'PSG College of Technology', 2017],
+  ['jobs-territory', 'Naveen Kumar', 'Full Stack Engineer', 'Government College of Technology, Coimbatore', 2021],
+];

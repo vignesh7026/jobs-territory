@@ -99,6 +99,25 @@ update public.jobs set first_posted_at = now() - interval '96 days', repost_coun
 update public.jobs set first_posted_at = now() - interval '58 days', repost_count = 1 where slug = 'qa-automation-engineer';
 update public.jobs set summary = 'We are hiring a talented person to join our growing team.', responsibilities = array['Various duties as assigned']::text[], requirements = array['Good attitude']::text[], skills = '{}' where slug = 'catalogue-operations-executive';
 
+insert into public.company_employees (company_id, full_name, title, college, grad_year) values
+  ((select id from public.companies where slug = 'tamarind-health'), 'Karthik Subramanian', 'Senior Frontend Engineer', 'PSG College of Technology', 2018),
+  ((select id from public.companies where slug = 'tamarind-health'), 'Janani Ravichandran', 'Product Designer', 'Anna University', 2019),
+  ((select id from public.companies where slug = 'tamarind-health'), 'Vimal Anand', 'QA Lead', 'SRM Institute of Science and Technology', 2016),
+  ((select id from public.companies where slug = 'indus-ledger'), 'Aishwarya Menon', 'Backend Engineer', 'PSG College of Technology', 2021),
+  ((select id from public.companies where slug = 'indus-ledger'), 'Rohit Nair', 'Engineering Manager', 'NIT Trichy', 2014),
+  ((select id from public.companies where slug = 'indus-ledger'), 'Deepa Krishnan', 'Data Analyst', 'Amrita Vishwa Vidyapeetham', 2020),
+  ((select id from public.companies where slug = 'aster-mobility'), 'Siddharth Rao', 'Mobile Lead', 'IIT Madras', 2013),
+  ((select id from public.companies where slug = 'aster-mobility'), 'Nandini Pillai', 'React Native Developer', 'PSG College of Technology', 2022),
+  ((select id from public.companies where slug = 'brightwell-labs'), 'Arjun Mehta', 'Staff Engineer', 'BITS Pilani', 2012),
+  ((select id from public.companies where slug = 'brightwell-labs'), 'Lavanya Iyer', 'Developer Advocate', 'Anna University', 2017),
+  ((select id from public.companies where slug = 'orchard-cloud'), 'Mohammed Faizal', 'Site Reliability Engineer', 'VIT Vellore', 2019),
+  ((select id from public.companies where slug = 'orchard-cloud'), 'Priyanka Das', 'Cloud Architect', 'PSG College of Technology', 2015),
+  ((select id from public.companies where slug = 'quayside-payments'), 'Gokul Raj', 'Backend Engineer', 'Government College of Technology, Coimbatore', 2020),
+  ((select id from public.companies where slug = 'lattice-robotics'), 'Harini Selvam', 'Robotics Software Engineer', 'PSG College of Technology', 2019),
+  ((select id from public.companies where slug = 'lattice-robotics'), 'Tarun Kapoor', 'ML Engineer', 'IIT Madras', 2018),
+  ((select id from public.companies where slug = 'jobs-territory'), 'Divya Raghunathan', 'Talent Partner', 'PSG College of Technology', 2017),
+  ((select id from public.companies where slug = 'jobs-territory'), 'Naveen Kumar', 'Full Stack Engineer', 'Government College of Technology, Coimbatore', 2021);
+
 insert into public.interview_insights (company_id, author_id, role_title, rounds, difficulty, outcome, experience, is_sample, created_at) values
   ((select id from public.companies where slug = 'indus-ledger'), null, 'Backend Engineer', 4, 4, 'offer', 'A recruiter screen, then a take-home building a small ledger API with idempotent writes. The technical round walked through my take-home line by line and asked how I would handle a retry storm. The final round was about how I work with risk and product people.', true, now() - interval '9 days'),
   ((select id from public.companies where slug = 'indus-ledger'), null, 'Data Analyst', 3, 3, 'rejected', 'SQL test first (window functions and a tricky join), then a case about default rates. Feedback afterwards said my SQL was fine but my case answer jumped to conclusions before checking the data.', true, now() - interval '18 days'),

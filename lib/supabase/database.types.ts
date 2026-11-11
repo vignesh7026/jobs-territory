@@ -129,6 +129,52 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"company_employees": {
+                  Row: {
+                    "college": string,"company_id": string,"full_name": string,"grad_year": number | null,"id": string,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "college": string,"company_id": string,"full_name": string,"grad_year"?: number | null,"id"?: string,"title": string
+                  }
+                  Update: {
+                    "college"?: string,"company_id"?: string,"full_name"?: string,"grad_year"?: number | null,"id"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "company_employees_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"connections": {
+                  Row: {
+                    "candidate_id": string,"company_id": string,"created_at": string,"full_name": string,"id": string,"relationship": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "candidate_id"?: string,"company_id": string,"created_at"?: string,"full_name": string,"id"?: string,"relationship": string
+                  }
+                  Update: {
+                    "candidate_id"?: string,"company_id"?: string,"created_at"?: string,"full_name"?: string,"id"?: string,"relationship"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "connections_candidate_id_fkey"
+      columns: ["candidate_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "connections_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"interview_insights": {
                   Row: {
                     "author_id": string | null,"company_id": string,"created_at": string,"difficulty": number,"experience": string,"id": string,"is_sample": boolean,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number

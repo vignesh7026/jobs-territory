@@ -211,5 +211,21 @@ select pg_temp.act_as(null, 'anon');
 select pg_temp.expect_error('select * from public.peer_insights', '42501', 'anon cannot read the notes');
 select pg_temp.reset();
 
+-- referrals: employees readable when signed in; connections private ------
+select pg_temp.act_as('11111111-1111-4111-8111-111111111111');
+select pg_temp.check_that((select count(*) from public.company_employees) >= 15, 'candidate reads the employee directory');
+select pg_temp.expect_error($$update public.company_employees set college = 'x'$$, '42501', 'candidates cannot edit employees');
+insert into public.connections (company_id, full_name, relationship) values ((select id from public.companies where slug = 'tamarind-health'), 'Someone I Know', 'friend');
+select pg_temp.check_that((select count(*) from public.connections) = 1, 'owner sees their connection');
+select pg_temp.expect_error($$insert into public.connections (company_id, full_name, relationship) values ((select id from public.companies where slug = 'tamarind-health'), 'Bad', 'enemy')$$, '23514', 'relationship must be one of the listed kinds');
+select pg_temp.reset();
+select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
+select pg_temp.check_that((select count(*) from public.connections) = 0, 'another candidate cannot see it');
+select pg_temp.reset();
+select pg_temp.act_as(null, 'anon');
+select pg_temp.expect_error('select * from public.company_employees', '42501', 'anon cannot read employees');
+select pg_temp.expect_error('select * from public.connections', '42501', 'anon cannot read connections');
+select pg_temp.reset();
+
 rollback;
 \echo ALL SECURITY CHECKS PASSED

@@ -7,7 +7,7 @@ import type { CompanyContact } from "@/lib/jobs/detail";
 const KIND_LABEL = { recruiter: "Recruiter", founder: "Founder" } as const;
 
 /** Who to write to about this job: the recruiter first, then the founder. Contacts are only loaded for signed-in users. */
-export function ReachOut({ contacts, jobTitle, company, signInHref }: { contacts: CompanyContact[]; jobTitle: string; company: string; signInHref: string | null }) {
+export function ReachOut({ contacts, jobTitle, company, signInHref, responseNote }: { contacts: CompanyContact[]; jobTitle: string; company: string; signInHref: string | null; responseNote?: string | null }) {
   if (signInHref) {
     return (
       <Card className="p-5">
@@ -48,7 +48,13 @@ export function ReachOut({ contacts, jobTitle, company, signInHref }: { contacts
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-xs text-muted">Mention the role in your first line and attach nothing until they reply.</p>
+      {responseNote && (
+        <p className="mt-4 text-sm" data-testid="reach-response">
+          <span className="font-medium">How fast they reply: </span>
+          {responseNote}
+        </p>
+      )}
+      <p className="mt-3 text-xs text-muted">Mention the role in your first line and attach nothing until they reply.</p>
     </Card>
   );
 }
