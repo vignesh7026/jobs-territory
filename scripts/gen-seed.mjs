@@ -1,6 +1,6 @@
 // Generates supabase/seed.sql from supabase/seed-data.mjs.   npm run seed:gen
 import { writeFileSync } from "node:fs";
-import { companies, contacts, jobs, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
+import { backgrounds, companies, contacts, jobs, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
 
 const q = (s) => (s == null ? "null" : `'${String(s).replace(/'/g, "''")}'`);
 const arr = (a) => `array[${a.map(q).join(", ")}]::text[]`;
@@ -18,10 +18,10 @@ const dot = (n) => n.replace(/^(dr|prof)\.\s+/i, "").toLowerCase().replace(/[^a-
 const contactRows = contacts.flatMap(([co, fName, fTitle, rName, rTitle]) =>
   [["founder", fName, fTitle], ["recruiter", rName, rTitle]].map(([kind, name, title]) => {
     const p = dot(name);
-    return `  ((select id from public.companies where slug = ${q(co)}), ${q(kind)}, ${q(name)}, ${q(title)}, ${q(`${p[0]}.${p[p.length - 1]}@${co}.example`)}, ${q(`https://${co}.example/team/${p.join("-")}`)})`;
+    return `  ((select id from public.companies where slug = ${q(co)}), ${q(kind)}, ${q(name)}, ${q(title)}, ${q(`${p[0]}.${p[p.length - 1]}@${co}.example`)}, ${q(`${co}-${p.join("-")}`)}, ${q(backgrounds[co][kind === "founder" ? 0 : 1])})`;
   }),
 );
-sql.push("insert into public.company_contacts (company_id, kind, full_name, title, email, profile_url) values");
+sql.push("insert into public.company_contacts (company_id, kind, full_name, title, email, slug, background) values");
 sql.push(contactRows.join(",\n") + ";\n");
 
 sql.push("insert into public.jobs (slug, company_id, title, location, work_mode, job_type, level, salary_min, salary_max, currency, summary, responsibilities, requirements, skills, posted_at, closes_at) values");

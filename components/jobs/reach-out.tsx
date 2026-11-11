@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, Mail } from "lucide-react";
+import { Mail, UserRound } from "lucide-react";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { Card } from "@/components/ui/card";
 import type { CompanyContact } from "@/lib/jobs/detail";
@@ -40,9 +40,9 @@ export function ReachOut({ contacts, jobTitle, company, signInHref }: { contacts
                 >
                   <Mail className="size-4 shrink-0" aria-hidden="true" /> {c.email}
                 </a>
-                <a href={c.profileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center gap-1.5 text-primary underline-offset-4 hover:underline">
-                  <ExternalLink className="size-4 shrink-0" aria-hidden="true" /> View profile<span className="sr-only"> of {c.name} (opens in a new tab)</span>
-                </a>
+                <Link href={`/people/${c.slug}`} className="inline-flex min-h-9 items-center gap-1.5 text-primary underline-offset-4 hover:underline">
+                  <UserRound className="size-4 shrink-0" aria-hidden="true" /> View profile<span className="sr-only"> of {c.name}</span>
+                </Link>
               </div>
             </div>
           </li>

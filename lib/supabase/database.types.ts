@@ -111,14 +111,14 @@ isOneToOne: false
                   ]
                 },"company_contacts": {
                   Row: {
-                    "company_id": string,"email": string,"full_name": string,"id": string,"kind": string,"profile_url": string,"title": string
+                    "background": string,"company_id": string,"email": string,"full_name": string,"id": string,"kind": string,"slug": string,"title": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "company_id": string,"email": string,"full_name": string,"id"?: string,"kind": string,"profile_url": string,"title": string
+                    "background"?: string,"company_id": string,"email": string,"full_name": string,"id"?: string,"kind": string,"slug": string,"title": string
                   }
                   Update: {
-                    "company_id"?: string,"email"?: string,"full_name"?: string,"id"?: string,"kind"?: string,"profile_url"?: string,"title"?: string
+                    "background"?: string,"company_id"?: string,"email"?: string,"full_name"?: string,"id"?: string,"kind"?: string,"slug"?: string,"title"?: string
                   }
                   Relationships: [
                     {
@@ -234,6 +234,11 @@ isOneToOne: false
       } },
 "application_transition_allowed":
 { Args: { "p_from": Database["public"]['Enums']["application_status"],"p_to": Database["public"]['Enums']["application_status"] }; Returns: boolean
+                           },
+"company_response":
+{ Args: { "p_slug": string }; Returns: {
+              "applications": number,"median_hours": number,"replied": number
+            }[]
                            },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean

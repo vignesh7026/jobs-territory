@@ -250,8 +250,7 @@ export const demoApplications = [
     [[27, 'applied', 'Application submitted']]],
 ];
 
-// Contacts are fictional people. Emails use the reserved ".example" TLD and profile links point at the company's own
-// (fictional) team page, so nothing here can reach a real person. [company slug, founder, founder title, recruiter, recruiter title]
+// Contacts are fictional people. Emails use the reserved ".example" TLD, so nothing here can reach a real person. [company slug, founder, founder title, recruiter, recruiter title]
 export const contacts = [
   ['jobs-territory', 'Arvind Shetty', 'Founder and CEO', 'Divya Raghunathan', 'Talent Partner'],
   ['indus-ledger', 'Kavya Menon', 'Co-founder and CEO', 'Sandeep Rao', 'Senior Recruiter'],
@@ -271,3 +270,24 @@ export const contacts = [
   ['basil-commerce', 'Sanjana Gupta', 'Founder', 'Imran Shaikh', 'Talent Partner'],
   ['vantage-retail', 'Rajiv Kapoor', 'Co-founder and CEO', 'Preeti Chawla', 'Senior HR Manager'],
 ];
+
+// What each person did before. Used for the profile page; [company slug, founder background, recruiter background]
+export const backgrounds = {
+  'jobs-territory': ['built staffing software for eight years across Coimbatore agencies', 'spent six years placing engineers at South Indian product companies'],
+  'indus-ledger': ['led credit risk at a public-sector bank', 'recruited for three fintech start-ups'],
+  'tamarind-health': ['practised as a physician for ten years before moving into health software', 'ran hospital hiring for a Chennai network'],
+  'brightwell-labs': ['maintained open-source build tools for years', 'was a developer before moving into technical recruiting'],
+  'orchard-cloud': ['ran infrastructure at a large telecom', 'built the talent team of two earlier cloud companies'],
+  'meridian-freight': ['grew the company from a single depot into a national network', 'has managed depot and office hiring for twelve years'],
+  'lattice-robotics': ['built warehouse automation at a research lab', 'specialised in hiring hardware and embedded engineers'],
+  'fernhill-analytics': ['spent a decade as an energy-sector analyst', 'ran graduate recruitment at a London consultancy'],
+  'quayside-payments': ['built payment rails at two banks', 'hired engineers for payment and compliance teams'],
+  'parallax-games': ['shipped mobile games for twelve years', 'recruits for studios across India and Europe'],
+  'koel-learning': ['taught at an engineering college before founding the company', 'hired teachers and content teams for two ed-tech firms'],
+  'greenfield-energy': ['led solar projects across Rajasthan and Tamil Nadu', 'hires field and software engineers for energy projects'],
+  'aster-mobility': ['worked on ride-hailing dispatch systems', 'built the people team from ten to two hundred'],
+  'halcyon-design': ['led design at an agency for fifteen years', 'recruits designers and researchers through portfolio reviews'],
+  'northgate-security': ['worked in incident response for a national CERT', 'hires security engineers and is known for clear feedback'],
+  'basil-commerce': ['founded and sold a small online grocery business', 'runs hiring for commerce and logistics teams'],
+  'vantage-retail': ['ran store operations for a national retail chain', 'has managed retail technology and analytics hiring for nine years'],
+};

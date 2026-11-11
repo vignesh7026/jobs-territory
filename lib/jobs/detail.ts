@@ -60,7 +60,7 @@ export interface CompanyContact {
   name: string;
   title: string;
   email: string;
-  profileUrl: string;
+  slug: string;
 }
 
 /** The company's recruiter and founder. Row-level security returns nothing to signed-out visitors. */
@@ -69,9 +69,9 @@ export async function getCompanyContacts(companySlug: string): Promise<CompanyCo
   const supabase = await createClient();
   const { data } = await supabase
     .from("company_contacts")
-    .select("kind, full_name, title, email, profile_url, companies!inner(slug)")
+    .select("kind, full_name, title, email, slug, companies!inner(slug)")
     .eq("companies.slug", companySlug);
   return (data ?? [])
-    .map((r) => ({ kind: r.kind as CompanyContact["kind"], name: r.full_name, title: r.title, email: r.email, profileUrl: r.profile_url }))
+    .map((r) => ({ kind: r.kind as CompanyContact["kind"], name: r.full_name, title: r.title, email: r.email, slug: r.slug }))
     .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "recruiter" ? -1 : 1));
 }
