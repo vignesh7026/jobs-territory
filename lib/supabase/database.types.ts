@@ -1,4 +1,4 @@
-﻿
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -111,14 +111,14 @@ isOneToOne: false
                   ]
                 },"jobs": {
                   Row: {
-                    "closes_at": string | null,"company_id": string,"currency": string,"id": string,"job_type": Database["public"]['Enums']["job_type"],"level": Database["public"]['Enums']["job_level"],"location": string,"posted_at": string,"requirements": (string)[],"responsibilities": (string)[],"salary_max": number | null,"salary_min": number | null,"search": unknown,"skills": (string)[],"slug": string,"summary": string,"title": string,"work_mode": Database["public"]['Enums']["work_mode"]
+                    "closes_at": string | null,"company_id": string,"currency": string,"id": string,"job_type": Database["public"]['Enums']["job_type"],"level": Database["public"]['Enums']["job_level"],"location": string,"posted_at": string,"requirements": (string)[],"responsibilities": (string)[],"salary_max": number | null,"salary_max_inr": number | null,"salary_min": number | null,"search": unknown,"skills": (string)[],"slug": string,"summary": string,"title": string,"work_mode": Database["public"]['Enums']["work_mode"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "closes_at"?: string | null,"company_id": string,"currency"?: string,"id"?: string,"job_type": Database["public"]['Enums']["job_type"],"level": Database["public"]['Enums']["job_level"],"location": string,"posted_at"?: string,"requirements"?: (string)[],"responsibilities"?: (string)[],"salary_max"?: number | null,"salary_min"?: number | null,"search"?: unknown,"skills"?: (string)[],"slug": string,"summary": string,"title": string,"work_mode": Database["public"]['Enums']["work_mode"]
+                    "closes_at"?: string | null,"company_id": string,"currency"?: string,"id"?: string,"job_type": Database["public"]['Enums']["job_type"],"level": Database["public"]['Enums']["job_level"],"location": string,"posted_at"?: string,"requirements"?: (string)[],"responsibilities"?: (string)[],"salary_max"?: number | null,"salary_max_inr"?: never,"salary_min"?: number | null,"search"?: unknown,"skills"?: (string)[],"slug": string,"summary": string,"title": string,"work_mode": Database["public"]['Enums']["work_mode"]
                   }
                   Update: {
-                    "closes_at"?: string | null,"company_id"?: string,"currency"?: string,"id"?: string,"job_type"?: Database["public"]['Enums']["job_type"],"level"?: Database["public"]['Enums']["job_level"],"location"?: string,"posted_at"?: string,"requirements"?: (string)[],"responsibilities"?: (string)[],"salary_max"?: number | null,"salary_min"?: number | null,"search"?: unknown,"skills"?: (string)[],"slug"?: string,"summary"?: string,"title"?: string,"work_mode"?: Database["public"]['Enums']["work_mode"]
+                    "closes_at"?: string | null,"company_id"?: string,"currency"?: string,"id"?: string,"job_type"?: Database["public"]['Enums']["job_type"],"level"?: Database["public"]['Enums']["job_level"],"location"?: string,"posted_at"?: string,"requirements"?: (string)[],"responsibilities"?: (string)[],"salary_max"?: number | null,"salary_max_inr"?: never,"salary_min"?: number | null,"search"?: unknown,"skills"?: (string)[],"slug"?: string,"summary"?: string,"title"?: string,"work_mode"?: Database["public"]['Enums']["work_mode"]
                   }
                   Relationships: [
                     {
@@ -217,6 +217,14 @@ isOneToOne: false
                            },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"jobs_tsquery":
+{ Args: { "p_q": string }; Returns: unknown
+                           },
+"search_jobs":
+{ Args: { "p_levels"?: (Database["public"]['Enums']["job_level"])[],"p_limit"?: number,"p_location"?: string,"p_modes"?: (Database["public"]['Enums']["work_mode"])[],"p_offset"?: number,"p_q"?: string,"p_sort"?: string,"p_types"?: (Database["public"]['Enums']["job_type"])[] }; Returns: {
+              "job_id": string,"total": number
+            }[]
                            }
           }
           Enums: {

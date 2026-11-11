@@ -1,7 +1,7 @@
 // Pure routing rules for authentication, kept free of Next.js and Supabase so they are easy to test.
 
 /** Where signed-in users land by default. */
-export const AFTER_LOGIN = "/";
+export const AFTER_LOGIN = "/jobs";
 
 const PROTECTED_PREFIXES = ["/applications", "/profile", "/saved", "/admin"];
 const AUTH_PAGES = ["/login", "/register"];

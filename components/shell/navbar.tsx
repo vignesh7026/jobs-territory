@@ -24,7 +24,7 @@ export function Navbar({ user }: { user: MenuUser | null }) {
   return (
     <header className="navbar-surface sticky top-0 z-40 border-b border-border">
       <div className="container flex h-16 items-center gap-6">
-        <Link href="/" className="flex items-center gap-2 font-heading text-base font-bold tracking-tight" onClick={() => setOpen(false)}>
+        <Link href="/" className="flex min-h-11 items-center gap-2 font-heading text-base font-bold tracking-tight" onClick={() => setOpen(false)}>
           <span className="grid size-7 place-items-center rounded-md bg-primary text-xs font-bold text-primary-fg" aria-hidden="true">
             JT
           </span>

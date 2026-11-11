@@ -21,7 +21,7 @@ describe("auth guard", () => {
   });
 
   it("keeps signed-in users away from the sign-in and register pages", () => {
-    expect(guardDecision({ pathname: "/login", isAuthed: true })).toEqual({ action: "redirect", to: "/" });
+    expect(guardDecision({ pathname: "/login", isAuthed: true })).toEqual({ action: "redirect", to: "/jobs" });
     expect(guardDecision({ pathname: "/register", isAuthed: true, next: "/applications" })).toEqual({ action: "redirect", to: "/applications" });
   });
 
@@ -40,11 +40,11 @@ describe("safeNext (open-redirect protection)", () => {
   });
 
   it.each(["https://evil.example", "//evil.example", "/\\evil.example", "javascript:alert(1)", "applications", "", null, undefined])("rejects %s", (bad) => {
-    expect(safeNext(bad as string | null | undefined)).toBe("/");
+    expect(safeNext(bad as string | null | undefined)).toBe("/jobs");
   });
 
   it("does not loop back to the auth pages", () => {
-    expect(safeNext("/login?next=/profile")).toBe("/");
-    expect(safeNext("/register")).toBe("/");
+    expect(safeNext("/login?next=/profile")).toBe("/jobs");
+    expect(safeNext("/register")).toBe("/jobs");
   });
 });
