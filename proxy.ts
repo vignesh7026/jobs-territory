@@ -4,8 +4,8 @@ import { updateSession } from "@/lib/supabase/proxy";
 
 // Next.js 16: this file replaces middleware.ts. It refreshes the session and does optimistic redirects only.
 export async function proxy(request: NextRequest) {
-  const { response, isAuthed } = await updateSession(request);
   const { pathname, search, searchParams } = request.nextUrl;
+  const { response, isAuthed } = await updateSession(request, { verify: pathname === "/login" || pathname === "/register" });
 
   const decision = guardDecision({ pathname, search, isAuthed, next: searchParams.get("next") });
   if (decision.action === "redirect") {
