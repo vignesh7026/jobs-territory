@@ -18,7 +18,7 @@ export function UpgradableLines({
   mutedSecondLine,
   testId,
 }: {
-  kind: "match" | "summary";
+  kind: "match" | "summary" | "peer-summary";
   body: Record<string, string>;
   plain: string[];
   /** only signed-in visitors can use the AI routes */

@@ -7,7 +7,7 @@ export interface AiResponse<T> {
 }
 
 /** Calls an AI route. Resolves with the data (AI or plain fallback) or rejects with a message safe to show. */
-export async function postAi<T>(kind: "match" | "gap" | "summary" | "cover-letter" | "follow-up" | "negotiate" | "voice-profile" | "interview-questions" | "interview-score" | "roadmap", body: Record<string, string | number>): Promise<AiResponse<T>> {
+export async function postAi<T>(kind: "match" | "gap" | "summary" | "cover-letter" | "follow-up" | "negotiate" | "voice-profile" | "interview-questions" | "interview-score" | "roadmap" | "peer-summary", body: Record<string, string | number>): Promise<AiResponse<T>> {
   let res: Response;
   try {
     res = await fetch(`/api/ai/${kind}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });

@@ -9,6 +9,8 @@ import { applicationHealth } from "@/lib/applications/health";
 import { getApplication } from "@/lib/applications/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
+import { OUTCOME_LABEL, insightStats, plainInsightSummary } from "@/lib/insights";
+import { getInsights } from "@/lib/insights-queries";
 import { plainRoadmap } from "@/lib/roadmap";
 import { SECONDS_PER_ANSWER, plainQuestions, plainScore } from "@/lib/interview";
 import { describeRange, plainNegotiation } from "@/lib/negotiate";
@@ -21,13 +23,14 @@ import { groundSkills, plainVoiceDraft } from "@/lib/voice-profile";
  * "ai", "cache" or "fallback"; if the model is down the plain, non-AI result comes back instead of an error.
  * 401 signed out, 404 unknown job/application, 422 not applicable, 429 too many requests.
  */
-const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate", "voice-profile", "interview-questions", "interview-score", "roadmap"] as const;
+const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate", "voice-profile", "interview-questions", "interview-score", "roadmap", "peer-summary"] as const;
 type Kind = (typeof KINDS)[number];
 
 const jobBody = z.object({ jobId: z.string().refine(isUuid, "Invalid job id") });
 const appBody = z.object({ applicationId: z.string().refine(isUuid, "Invalid application id") });
 const scoreBody = jobBody.extend({ question: z.string().trim().min(5).max(300), kind: z.enum(["intro", "behavioral", "skill"]), answer: z.string().trim().min(1).max(3000), seconds: z.number().int().min(0).max(900) });
 const roadmapBody = z.object({ weeks: z.number().int().min(2).max(8) });
+const peerBody = z.object({ companyId: z.string().refine(isUuid, "Invalid company id"), company: z.string().trim().min(1).max(120) });
 const voiceBody = z.object({ transcript: z.string().trim().min(40).max(4000) });
 const negotiateBody = appBody.extend({ offer: z.string().trim().max(40).optional() });
 const reply = (data: unknown, source: string) => NextResponse.json({ data, source }, { headers: { "Cache-Control": "private, no-store" } });
@@ -84,6 +87,17 @@ export async function POST(request: Request, ctx: RouteContext<"/api/ai/[kind]">
       if (!job) return err("Job not found.", 404);
       const p = prompts.interviewQuestions(job.ai);
       const r = await ai({ kind: "interview-questions", jobId: job.id, schema: schemas.interviewQuestions, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: { questions: plainQuestions(job.ai) } });
+      return reply(r.data, r.source);
+    }
+
+    case "peer-summary": {
+      const parsed = peerBody.safeParse(body);
+      if (!parsed.success) return err("Invalid company.", 400);
+      const notes = await getInsights(parsed.data.companyId);
+      const plain = { lines: plainInsightSummary(insightStats(notes)) as [string, string, string] };
+      if (notes.length < 2) return reply(plain, "fallback"); // too little to summarise: the plain lines are the honest answer
+      const p = prompts.peerSummary({ company: parsed.data.company, notes: notes.map((n) => ({ role: n.roleTitle, rounds: n.rounds, difficulty: n.difficulty, outcome: OUTCOME_LABEL[n.outcome], text: n.experience })) });
+      const r = await ai({ kind: "peer-summary", inputKey: `${parsed.data.companyId}:${notes.length}:${notes[0].createdAt}`, schema: schemas.peerSummary, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: plain });
       return reply(r.data, r.source);
     }
 

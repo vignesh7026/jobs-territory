@@ -129,6 +129,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"interview_insights": {
+                  Row: {
+                    "author_id": string | null,"company_id": string,"created_at": string,"difficulty": number,"experience": string,"id": string,"is_sample": boolean,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string | null,"company_id": string,"created_at"?: string,"difficulty": number,"experience": string,"id"?: string,"is_sample"?: boolean,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number
+                  }
+                  Update: {
+                    "author_id"?: string | null,"company_id"?: string,"created_at"?: string,"difficulty"?: number,"experience"?: string,"id"?: string,"is_sample"?: boolean,"outcome"?: Database["public"]['Enums']["insight_outcome"],"role_title"?: string,"rounds"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "interview_insights_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "interview_insights_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"jobs": {
                   Row: {
                     "closes_at": string | null,"company_id": string,"currency": string,"first_posted_at": string | null,"id": string,"is_vague": boolean | null,"job_type": Database["public"]['Enums']["job_type"],"level": Database["public"]['Enums']["job_level"],"location": string,"posted_at": string,"repost_count": number,"requirements": (string)[],"responsibilities": (string)[],"salary_max": number | null,"salary_max_inr": number | null,"salary_min": number | null,"search": unknown,"skills": (string)[],"slug": string,"summary": string,"title": string,"work_mode": Database["public"]['Enums']["work_mode"]
@@ -232,7 +258,27 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "peer_insights": {
+                  Row: {
+                    "company_id": string,"created_at": string,"difficulty": number,"experience": string,"id": string,"is_sample": boolean,"mine": boolean | null,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "company_id"?: string | null,"created_at"?: string | null,"difficulty"?: number | null,"experience"?: string | null,"id"?: string | null,"is_sample"?: boolean | null,"mine"?: never,"outcome"?: Database["public"]['Enums']["insight_outcome"] | null,"role_title"?: string | null,"rounds"?: number | null
+                         }
+                        Update: {
+                           "company_id"?: string | null,"created_at"?: string | null,"difficulty"?: number | null,"experience"?: string | null,"id"?: string | null,"is_sample"?: boolean | null,"mine"?: never,"outcome"?: Database["public"]['Enums']["insight_outcome"] | null,"role_title"?: string | null,"rounds"?: number | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "interview_insights_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
           }
           Functions: {
             "admin_set_application_status":
@@ -285,7 +331,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "app_role": "candidate"|"admin","application_status": "applied"|"under_review"|"shortlisted"|"interview"|"offered"|"rejected","job_level": "intern"|"junior"|"mid"|"senior"|"lead","job_type": "full_time"|"part_time"|"contract"|"internship","work_mode": "onsite"|"hybrid"|"remote"
+            "app_role": "candidate"|"admin","application_status": "applied"|"under_review"|"shortlisted"|"interview"|"offered"|"rejected","insight_outcome": "offer"|"rejected"|"no_answer"|"withdrew","job_level": "intern"|"junior"|"mid"|"senior"|"lead","job_type": "full_time"|"part_time"|"contract"|"internship","work_mode": "onsite"|"hybrid"|"remote"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -405,7 +451,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "app_role": ["candidate", "admin"],"application_status": ["applied", "under_review", "shortlisted", "interview", "offered", "rejected"],"job_level": ["intern", "junior", "mid", "senior", "lead"],"job_type": ["full_time", "part_time", "contract", "internship"],"work_mode": ["onsite", "hybrid", "remote"]
+            "app_role": ["candidate", "admin"],"application_status": ["applied", "under_review", "shortlisted", "interview", "offered", "rejected"],"insight_outcome": ["offer", "rejected", "no_answer", "withdrew"],"job_level": ["intern", "junior", "mid", "senior", "lead"],"job_type": ["full_time", "part_time", "contract", "internship"],"work_mode": ["onsite", "hybrid", "remote"]
           }
         }
 } as const

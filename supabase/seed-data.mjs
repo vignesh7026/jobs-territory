@@ -305,3 +305,16 @@ export const vagueListing = {
   responsibilities: ['Various duties as assigned'],
   requirements: ['Good attitude'],
 };
+
+// Sample interview notes. They are illustrative demo data, flagged as samples in the database and labelled as such on screen.
+// [company slug, role, rounds, difficulty 1-5, outcome, text]
+export const sampleInsights = [
+  ['indus-ledger', 'Backend Engineer', 4, 4, 'offer', 'A recruiter screen, then a take-home building a small ledger API with idempotent writes. The technical round walked through my take-home line by line and asked how I would handle a retry storm. The final round was about how I work with risk and product people.'],
+  ['indus-ledger', 'Data Analyst', 3, 3, 'rejected', 'SQL test first (window functions and a tricky join), then a case about default rates. Feedback afterwards said my SQL was fine but my case answer jumped to conclusions before checking the data.'],
+  ['tamarind-health', 'Frontend Engineer', 3, 3, 'offer', 'Pairing session on a real accessibility bug in their booking flow. They cared more about how I reasoned and tested than about finishing. Fast replies at every stage.'],
+  ['tamarind-health', 'QA Automation Engineer', 3, 2, 'no_answer', 'Friendly screen and a short test-writing exercise. Then silence for five weeks despite one follow-up.'],
+  ['aster-mobility', 'React Native Developer', 4, 4, 'offer', 'Live coding in React Native with a flaky network simulation, then a system design round on offline sync. The mobile lead was very clear about what good looks like.'],
+  ['aster-mobility', 'Growth Marketing Manager', 3, 3, 'withdrew', 'Three rounds with a presentation on a real funnel. I withdrew after the second salary conversation did not match the listing.'],
+  ['brightwell-labs', 'Developer Advocate', 4, 3, 'rejected', 'Writing exercise, a recorded talk, and two interviews. They wanted evidence of a published track record; the feedback was kind and specific.'],
+  ['orchard-cloud', 'Site Reliability Engineer', 5, 5, 'rejected', 'Five rounds including an on-call scenario and a Linux debugging session on a live box. Hard but fair, and the interviewers explained their reasoning afterwards.'],
+];

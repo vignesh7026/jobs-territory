@@ -9,6 +9,8 @@ import { GapCard, MatchCard, MatchSignIn } from "@/components/match/match-card";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { BackLink } from "@/components/jobs/back-link";
 import { GhostCard } from "@/components/jobs/ghost-card";
+import { InsightsCard } from "@/components/insights/insights-card";
+import { getInsights, hasAppliedToCompany } from "@/lib/insights-queries";
 import { ReachOut } from "@/components/jobs/reach-out";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -56,6 +58,7 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
   const matchProfile = await getMatchProfile(user?.id ?? null);
   const match = matchProfile ? computeMatch(matchProfile, { skills: job.skills, level: job.level, workMode: job.workMode, location: job.location, title: job.title }) : null;
 
+  const [insights, appliedHere] = user ? await Promise.all([getInsights(job.companyInfo.id), hasAppliedToCompany(user.id, job.companyInfo.id)]) : [[], false];
   const contacts = user ? await getCompanyContacts(job.companyInfo.slug) : [];
 
   const isSaved = (await getSavedJobIds(user?.id ?? null)).has(job.id);
@@ -174,6 +177,7 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
           )}
           <GhostCard job={{ firstPostedAt: job.firstPostedAt, postedAt: job.postedAt, repostCount: job.repostCount, isVague: job.isVague }} />
           <ReachOut contacts={contacts} jobTitle={job.title} company={c.name} signInHref={user ? null : `/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
+          <InsightsCard companyId={c.id} companyName={c.name} jobSlug={job.slug} jobTitle={job.title} insights={insights} canShare={appliedHere} signedIn={Boolean(user)} loginHref={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
           <Card className="p-5">
             <h2 className="text-base">About {c.name}</h2>
             <p className="mt-1 text-xs text-muted">

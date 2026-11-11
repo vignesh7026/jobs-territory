@@ -191,5 +191,25 @@ select pg_temp.check_that((select count(*) from public.profiles where id = '1111
 select pg_temp.check_that((select count(*) from storage.objects where bucket_id = 'resumes' and name like '11111111-1111-4111-8111-111111111111/%') = 1, 'revealed once shortlisted: resume readable');
 select pg_temp.reset();
 
+-- interview insights: anonymous, and only after applying -----------------
+select pg_temp.act_as('11111111-1111-4111-8111-111111111111');
+select pg_temp.check_that((select count(*) from public.peer_insights) >= 8, 'candidate reads the notes through the view');
+select pg_temp.expect_error('select author_id from public.peer_insights', '42703', 'the view has no author column');
+select pg_temp.check_that((select count(*) from public.interview_insights where author_id is distinct from (select auth.uid())) = 0, 'the table itself shows nobody else''s rows, so no other author is ever visible');
+insert into public.interview_insights (company_id, role_title, rounds, difficulty, outcome, experience) values ((select id from public.companies where slug = 'tamarind-health'), 'Frontend Engineer', 3, 3, 'offer', 'Pairing round on a real accessibility bug, friendly team, quick replies throughout.');
+select pg_temp.check_that((select count(*) from public.peer_insights where mine) = 1, 'my own note is flagged as mine');
+select pg_temp.expect_error($$insert into public.interview_insights (company_id, role_title, rounds, difficulty, outcome, experience) values ((select id from public.companies where slug = 'tamarind-health'), 'Again', 2, 2, 'offer', 'A second note about the same company should be refused by the unique index.')$$, '23505', 'one note per person per company');
+select pg_temp.expect_error($$insert into public.interview_insights (company_id, role_title, rounds, difficulty, outcome, experience) values ((select id from public.companies where slug = 'northgate-security'), 'Analyst', 2, 2, 'offer', 'I never applied to this company, so this insert must be refused by the policy.')$$, '42501', 'cannot share about a company you did not apply to');
+select pg_temp.expect_error($$insert into public.interview_insights (company_id, role_title, rounds, difficulty, outcome, experience, is_sample) values ((select id from public.companies where slug = 'tamarind-health'), 'Fake', 2, 2, 'offer', 'Trying to post a note flagged as a sample, which only the seed may do.', true)$$, '42501', 'cannot post a note flagged as a sample');
+select pg_temp.reset();
+select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
+select pg_temp.check_that((select count(*) from public.peer_insights where mine) = 0, 'another candidate sees it, but not as theirs');
+delete from public.interview_insights where company_id = (select id from public.companies where slug = 'tamarind-health');
+select pg_temp.check_that((select count(*) from public.peer_insights where role_title = 'Frontend Engineer' and not is_sample) = 1, 'another candidate cannot delete someone else''s note');
+select pg_temp.reset();
+select pg_temp.act_as(null, 'anon');
+select pg_temp.expect_error('select * from public.peer_insights', '42501', 'anon cannot read the notes');
+select pg_temp.reset();
+
 rollback;
 \echo ALL SECURITY CHECKS PASSED

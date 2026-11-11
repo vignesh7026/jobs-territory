@@ -40,6 +40,7 @@ export const schemas = {
   interviewQuestions: z.object({ questions: z.array(z.object({ kind: z.enum(["intro", "behavioral", "skill"]), text: z.string().trim().min(15).max(240) })).length(5) }),
   interviewScore: z.object({ clarity: z.number().int().min(1).max(5), structure: z.number().int().min(1).max(5), specificity: z.number().int().min(1).max(5), feedback: z.string().trim().min(20).max(420), tip: z.string().trim().min(10).max(260) }),
   roadmap: z.object({ weeks: z.array(z.object({ week: z.number().int().min(1).max(8), skill: z.string().trim().min(1).max(60), tasks: z.array(z.string().trim().min(10).max(170)).min(2).max(3) })).min(2).max(8) }),
+  peerSummary: z.object({ lines: z.tuple([line(200), line(200), line(200)]) }),
   voiceProfile: z.object({ headline: z.string().trim().max(160), summary: z.string().trim().min(20).max(900), skills: z.array(z.string().trim().min(1).max(40)).max(12) }),
 };
 export type MatchAi = z.infer<typeof schemas.match>;
@@ -109,6 +110,12 @@ ${data({ role: a.job.title, question: a.question, questionKind: a.kind, answer: 
     user: `Make a ${a.weeks}-week learning plan to get a candidate ready to apply for this job. One entry per week, as the "weeks" array, week numbers 1 to ${a.weeks}. Each entry has the "skill" it focuses on (use the missing skills, most important first; once they are covered use "Portfolio" or "Interviews") and 2 or 3 short, concrete "tasks" the candidate can do that week (build something small, read a specific part, write something down). Do not include links or URLs. Do not claim the candidate already has a missing skill. Keep each task under 160 characters.
 Shape: {"weeks":[{"week":1,"skill":"...","tasks":["...","..."]}]}
 ${data({ job: jobPayload(a.job), skillsTheyHave: a.have.slice(0, 20), skillsTheyMiss: a.missing.slice(0, 8) })}`,
+  }),
+  peerSummary: (a: { company: string; notes: { role: string; rounds: number; difficulty: number; outcome: string; text: string }[] }) => ({
+    maxTokens: 500,
+    user: `Summarise what candidates say about interviewing at this company, in exactly three lines (the "lines" array): line 1 how the process usually runs (rounds, formats), line 2 what they were tested on or what seemed to help, line 3 what to watch out for or prepare. Use ONLY what the notes say; if the notes disagree, say so. No advice that is not in the notes. Each line under 190 characters.
+Shape: {"lines":["...","...","..."]}
+${data({ company: a.company, notes: a.notes.slice(0, 12).map((n) => ({ ...n, text: trim(n.text, 600) })) })}`,
   }),
   voiceProfile: (transcript: string) => ({
     maxTokens: 700,
