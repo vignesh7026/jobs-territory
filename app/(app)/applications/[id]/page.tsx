@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, FileText } from "lucide-react";
 import { AdminStatusPanel } from "@/components/admin/status-panel";
 import { EventLog } from "@/components/applications/event-log";
+import { FollowUpPanel } from "@/components/applications/follow-up-panel";
+import { HealthMeter } from "@/components/applications/health-meter";
+import { applicationHealth } from "@/lib/applications/health";
 import { StatusBadge } from "@/components/applications/status-badge";
 import { StatusTimeline } from "@/components/applications/status-timeline";
 import { WithdrawButton } from "@/components/applications/withdraw-button";
@@ -26,6 +29,7 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
   if (!isOwner && !isAdminView) notFound();
 
   const canWithdraw = isOwner && app.undoable;
+  const health = isOwner ? applicationHealth(app.status, app.updatedAt) : null;
 
   return (
     <section className="container py-6 md:py-8">
@@ -69,6 +73,16 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
         </div>
 
         <aside className="grid gap-4">
+          {health && (
+            <Card className="p-5">
+              <h2 className="mb-3 text-base">Application health</h2>
+              <HealthMeter result={health} />
+              <div className="mt-4 border-t border-border pt-4">
+                <FollowUpPanel applicationId={app.id} urgent={health.health !== "on_track"} />
+              </div>
+            </Card>
+          )}
+
           {isAdminView && (
             <>
               <Card className="p-5">

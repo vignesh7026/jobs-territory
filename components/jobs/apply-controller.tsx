@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Sparkles } from "lucide-react";
+import { AiTag } from "@/components/ai/ai-tag";
+import { isAi, postAi, type AiSource } from "@/components/ai/use-ai";
 import { StatusBadge } from "@/components/applications/status-badge";
 import { useToast } from "@/components/shell/toaster";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -180,6 +182,22 @@ function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: b
   const [note, setNote] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string>();
+  const [drafting, setDrafting] = useState(false);
+  const [draft, setDraft] = useState<{ source: AiSource; previous: string } | null>(null);
+
+  async function draftWithAi() {
+    setDrafting(true);
+    setError(undefined);
+    try {
+      const r = await postAi<{ text: string }>("cover-letter", { jobId: job.id });
+      setDraft({ source: r.source, previous: note });
+      setNote(r.data.text.slice(0, 3000));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "We could not draft that. Try again.");
+    } finally {
+      setDrafting(false);
+    }
+  }
   const [fieldError, setFieldError] = useState<string>();
   const reduce = useReducedMotion();
 
@@ -249,10 +267,24 @@ function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: b
         </div>
 
         <div className="grid gap-1.5">
-          <label htmlFor="coverNote" className="text-sm font-medium">
-            Cover note <span className="font-normal text-muted">(optional)</span>
-          </label>
-          <Textarea id="coverNote" rows={6} value={note} onChange={(e) => setNote(e.target.value)} maxLength={3000} aria-invalid={Boolean(fieldError)} aria-describedby="coverNote-hint" placeholder="Two or three sentences on why this role and why you." />
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor="coverNote" className="text-sm font-medium">
+              Cover note <span className="font-normal text-muted">(optional)</span>
+            </label>
+            <Button type="button" variant="ghost" size="sm" onClick={draftWithAi} disabled={drafting || phase !== "idle"}>
+              {drafting ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
+              {drafting ? "Drafting" : "Draft with AI"}
+            </Button>
+          </div>
+          <Textarea id="coverNote" rows={8} value={note} onChange={(e) => setNote(e.target.value)} maxLength={3000} aria-invalid={Boolean(fieldError)} aria-describedby="coverNote-hint" placeholder="Two or three sentences on why this role and why you." />
+          {draft && (
+            <div className="flex items-center justify-between gap-2" data-testid="draft-note">
+              {isAi(draft.source) ? <AiTag label="Drafted by AI from your profile. Edit freely." /> : <span className="text-xs text-muted">Template draft (AI is unavailable right now). Edit freely.</span>}
+              <button type="button" onClick={() => { setNote(draft.previous); setDraft(null); }} className="text-xs text-primary underline-offset-4 hover:underline">
+                Undo draft
+              </button>
+            </div>
+          )}
           <p id="coverNote-hint" className={cn("text-xs", fieldError ? "text-danger-fg" : "text-muted")}>
             {fieldError ?? `${note.length} of 3000 characters`}
           </p>

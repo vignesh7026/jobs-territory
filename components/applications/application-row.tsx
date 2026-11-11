@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { HealthChip } from "@/components/applications/health-meter";
 import { StatusBadge } from "@/components/applications/status-badge";
+import { applicationHealth } from "@/lib/applications/health";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { PIPELINE, STATUS_LABELS } from "@/lib/applications/status";
 import { timeAgo } from "@/lib/format";
@@ -37,7 +39,10 @@ export function ApplicationRow({ application: a, href }: { application: Applicat
           </p>
         </div>
         <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border pt-3 sm:col-span-1 sm:grid sm:justify-items-end sm:border-0 sm:pt-0">
-          <StatusBadge status={a.status} />
+          <div className="flex items-center gap-3">
+            <HealthChip result={applicationHealth(a.status, a.updatedAt)} />
+            <StatusBadge status={a.status} />
+          </div>
           <div className="grid justify-items-end gap-1">
             <ProgressSegments reached={a.reached} rejected={a.status === "rejected"} />
             <span className="sr-only">{stage}</span>

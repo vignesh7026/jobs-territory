@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, Check, Minus } from "lucide-react";
+import { GapAdvice } from "@/components/ai/gap-advice";
+import { UpgradableLines } from "@/components/ai/upgradable-lines";
 import { MatchRing } from "@/components/match/match-ring";
 import { Card } from "@/components/ui/card";
 import { TIER_LABEL, type MatchResult } from "@/lib/match";
@@ -8,7 +10,7 @@ import { cn } from "@/lib/utils";
 const SEVERITY_LABEL = { high: "Big gap", medium: "Worth knowing", low: "Minor" } as const;
 
 /** Your match: score, two plain lines, and the skills you have and lack. */
-export function MatchCard({ match, explanation, jobSkillCount }: { match: MatchResult; explanation: [string, string]; jobSkillCount: number }) {
+export function MatchCard({ match, explanation, jobSkillCount, jobId }: { match: MatchResult; explanation: [string, string]; jobSkillCount: number; jobId: string }) {
   return (
     <Card className="p-5">
       <h2 className="text-base">Your match</h2>
@@ -20,10 +22,7 @@ export function MatchCard({ match, explanation, jobSkillCount }: { match: MatchR
         </div>
       </div>
 
-      <div className="mt-4 grid gap-1.5 text-sm leading-relaxed" data-testid="match-explanation">
-        <p>{explanation[0]}</p>
-        <p className="text-muted">{explanation[1]}</p>
-      </div>
+      <UpgradableLines kind="match" body={{ jobId }} plain={explanation} enabled className="mt-4 grid gap-1.5 text-sm leading-relaxed" mutedSecondLine testId="match-explanation" />
 
       {(match.matched.length > 0 || match.missing.length > 0) && (
         <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Skill comparison">
@@ -48,7 +47,7 @@ export function MatchCard({ match, explanation, jobSkillCount }: { match: MatchR
 }
 
 /** Straight talk about what could count against the candidate, most serious first. Shown even when the score is high. */
-export function GapCard({ match }: { match: MatchResult }) {
+export function GapCard({ match, jobId }: { match: MatchResult; jobId: string }) {
   const gaps = match.gaps.slice(0, 4);
   return (
     <Card className="p-5">
@@ -67,6 +66,7 @@ export function GapCard({ match }: { match: MatchResult }) {
           ))}
         </ul>
       )}
+      <GapAdvice jobId={jobId} missingCount={match.missing.length} />
       {match.missing.length > 0 && (
         <p className="mt-4 border-t border-border pt-3 text-xs text-muted">
           Have a skill we did not list? <Link href="/profile#skills" className="text-primary underline-offset-4 hover:underline">Add it to your profile</Link> and the score updates.

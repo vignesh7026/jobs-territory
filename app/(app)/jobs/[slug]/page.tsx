@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowLeftRight, Building2, Clock, Laptop, MapPin } from "lucide-react";
+import { UpgradableLines } from "@/components/ai/upgradable-lines";
 import { ApplyController } from "@/components/jobs/apply-controller";
+import { plainSummary } from "@/lib/ai/features";
 import { GapCard, MatchCard, MatchSignIn } from "@/components/match/match-card";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { Badge } from "@/components/ui/badge";
@@ -99,6 +101,20 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
             </p>
           )}
 
+          <section className="mt-8 rounded-lg border border-border bg-surface p-5" aria-labelledby="in-short">
+            <h2 id="in-short" className="text-base">
+              In short
+            </h2>
+            <UpgradableLines
+              kind="summary"
+              body={{ jobId: job.id }}
+              plain={plainSummary({ title: job.title, company: job.companyInfo.name, level: job.level, workMode: job.workMode, jobType: job.jobType, location: job.location, summary: job.summary, responsibilities: job.responsibilities, requirements: job.requirements, skills: job.skills }).lines}
+              enabled={Boolean(user)}
+              className="mt-3 grid gap-2 text-sm leading-relaxed"
+              testId="job-summary"
+            />
+          </section>
+
           <section className="mt-8">
             <h2 className="text-xl">About the role</h2>
             <p className="mt-3 text-base leading-relaxed">{job.summary}</p>
@@ -130,8 +146,8 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
           />
           {match ? (
             <>
-              <MatchCard match={match} explanation={fallbackExplanation(match, job.skills.length)} jobSkillCount={job.skills.length} />
-              <GapCard match={match} />
+              <MatchCard match={match} explanation={fallbackExplanation(match, job.skills.length)} jobSkillCount={job.skills.length} jobId={job.id} />
+              <GapCard match={match} jobId={job.id} />
             </>
           ) : (
             <MatchSignIn href={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
