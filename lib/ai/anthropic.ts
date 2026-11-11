@@ -23,10 +23,48 @@ export interface ModelRequest {
 const endpoint = () => `${(process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com").replace(/\/$/, "")}/v1/messages`;
 const TIMEOUT_MS = 20_000;
 
-/** One Messages API call. The key is read on the server only and never sent anywhere else. */
+const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+
+/** Groq's OpenAI-compatible chat completions API. Same contract: text out, AiError on any failure. */
+async function callGroq(req: ModelRequest, key: string): Promise<string> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(GROQ_ENDPOINT, {
+      method: "POST",
+      signal: controller.signal,
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+        // gpt-oss is a reasoning model: reasoning tokens count against the limit, so leave headroom and keep it short.
+        max_tokens: req.maxTokens + 400,
+        reasoning_effort: "low",
+        temperature: 0.3,
+        messages: [
+          { role: "system", content: req.system },
+          { role: "user", content: req.user },
+        ],
+      }),
+    });
+    if (!res.ok) throw new AiError(`Groq API returned ${res.status}`, res.status, [400, 401, 403].includes(res.status));
+    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const text = json.choices?.[0]?.message?.content;
+    if (!text) throw new AiError("The model returned no text", res.status);
+    return text;
+  } catch (e) {
+    if (e instanceof AiError) throw e;
+    throw new AiError(e instanceof Error && e.name === "AbortError" ? "The model took too long to answer" : "Could not reach the model", 0);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** One model call: Groq when GROQ_API_KEY is set, otherwise the Anthropic Messages API. The key is read on the server only and never sent anywhere else. */
 export async function callAnthropic(req: ModelRequest): Promise<string> {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey) return callGroq(req, groqKey);
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new AiError("ANTHROPIC_API_KEY is not set", 0, true);
+  if (!key) throw new AiError("No AI key is set (GROQ_API_KEY or ANTHROPIC_API_KEY)", 0, true);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);

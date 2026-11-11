@@ -109,6 +109,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"company_contacts": {
+                  Row: {
+                    "company_id": string,"email": string,"full_name": string,"id": string,"kind": string,"profile_url": string,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "company_id": string,"email": string,"full_name": string,"id"?: string,"kind": string,"profile_url": string,"title": string
+                  }
+                  Update: {
+                    "company_id"?: string,"email"?: string,"full_name"?: string,"id"?: string,"kind"?: string,"profile_url"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "company_contacts_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"jobs": {
                   Row: {
                     "closes_at": string | null,"company_id": string,"currency": string,"id": string,"job_type": Database["public"]['Enums']["job_type"],"level": Database["public"]['Enums']["job_level"],"location": string,"posted_at": string,"requirements": (string)[],"responsibilities": (string)[],"salary_max": number | null,"salary_max_inr": number | null,"salary_min": number | null,"search": unknown,"skills": (string)[],"slug": string,"summary": string,"title": string,"work_mode": Database["public"]['Enums']["work_mode"]

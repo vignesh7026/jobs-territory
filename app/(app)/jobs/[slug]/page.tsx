@@ -8,11 +8,12 @@ import { plainSummary } from "@/lib/ai/features";
 import { GapCard, MatchCard, MatchSignIn } from "@/components/match/match-card";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { BackLink } from "@/components/jobs/back-link";
+import { ReachOut } from "@/components/jobs/reach-out";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth/session";
 import { daysUntil, formatSalary, timeAgo } from "@/lib/format";
-import { getJobBySlug, getMyApplication, getMyResumeName } from "@/lib/jobs/detail";
+import { getCompanyContacts, getJobBySlug, getMyApplication, getMyResumeName } from "@/lib/jobs/detail";
 import { LEVEL_LABELS, MODE_LABELS, TYPE_LABELS, type WorkMode } from "@/lib/jobs/filters";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
 import { getMatchProfile } from "@/lib/profile/queries";
@@ -52,6 +53,8 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
 
   const matchProfile = await getMatchProfile(user?.id ?? null);
   const match = matchProfile ? computeMatch(matchProfile, { skills: job.skills, level: job.level, workMode: job.workMode, location: job.location, title: job.title }) : null;
+
+  const contacts = user ? await getCompanyContacts(job.companyInfo.slug) : [];
 
   const isSaved = (await getSavedJobIds(user?.id ?? null)).has(job.id);
 
@@ -162,6 +165,7 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
           ) : (
             <MatchSignIn href={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
           )}
+          <ReachOut contacts={contacts} jobTitle={job.title} company={c.name} signInHref={user ? null : `/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
           <Card className="p-5">
             <h2 className="text-base">About {c.name}</h2>
             <p className="mt-1 text-xs text-muted">

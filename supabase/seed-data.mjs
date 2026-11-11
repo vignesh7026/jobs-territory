@@ -249,3 +249,25 @@ export const demoApplications = [
   ['developer-advocate', 'I write regularly about TypeScript patterns and would like to do that full time.',
     [[27, 'applied', 'Application submitted']]],
 ];
+
+// Contacts are fictional people. Emails use the reserved ".example" TLD and profile links point at the company's own
+// (fictional) team page, so nothing here can reach a real person. [company slug, founder, founder title, recruiter, recruiter title]
+export const contacts = [
+  ['jobs-territory', 'Arvind Shetty', 'Founder and CEO', 'Divya Raghunathan', 'Talent Partner'],
+  ['indus-ledger', 'Kavya Menon', 'Co-founder and CEO', 'Sandeep Rao', 'Senior Recruiter'],
+  ['tamarind-health', 'Dr. Ramesh Iyer', 'Founder', 'Lakshmi Narayanan', 'Head of Talent'],
+  ['brightwell-labs', 'Ishaan Deshpande', 'Co-founder and CTO', 'Nisha Kulkarni', 'Technical Recruiter'],
+  ['orchard-cloud', 'Farhan Qureshi', 'Founder and CEO', 'Pooja Reddy', 'Talent Acquisition Lead'],
+  ['meridian-freight', 'Harpreet Sandhu', 'Managing Director', 'Anita Joshi', 'HR Business Partner'],
+  ['lattice-robotics', 'Tarun Bhatia', 'Co-founder and CEO', 'Meghna Pillai', 'People Operations Lead'],
+  ['fernhill-analytics', 'Eleanor Whitcombe', 'Founder', 'Callum Brook', 'Recruitment Manager'],
+  ['quayside-payments', 'Rohan Chatterjee', 'Co-founder and CEO', 'Swati Bansal', 'Senior Recruiter'],
+  ['parallax-games', 'Aditi Verma', 'Founder and Creative Director', 'Kabir Anand', 'Talent Partner'],
+  ['koel-learning', 'Prof. Suresh Nambiar', 'Founder', 'Revathi Subramanian', 'Recruiter'],
+  ['greenfield-energy', 'Vikram Malhotra', 'Founder and CEO', 'Tanvi Mehta', 'Talent Acquisition Specialist'],
+  ['aster-mobility', 'Neha Saxena', 'Co-founder and CEO', 'Arjun Nair', 'Head of People'],
+  ['halcyon-design', 'Maya Fernandes', 'Founder and Design Director', 'Zoya Khan', 'Recruiter'],
+  ['northgate-security', 'Dmitri Volkov', 'Co-founder and CEO', 'Hannah Pryce', 'Technical Recruiter'],
+  ['basil-commerce', 'Sanjana Gupta', 'Founder', 'Imran Shaikh', 'Talent Partner'],
+  ['vantage-retail', 'Rajiv Kapoor', 'Co-founder and CEO', 'Preeti Chawla', 'Senior HR Manager'],
+];

@@ -54,3 +54,24 @@ export async function getMyResumeName(userId: string): Promise<string | null> {
   const { data } = await supabase.from("profiles").select("resume_path").eq("id", userId).maybeSingle();
   return data?.resume_path ? data.resume_path.split("/").pop()!.replace(/^\d+-/, "") : null;
 }
+
+export interface CompanyContact {
+  kind: "founder" | "recruiter";
+  name: string;
+  title: string;
+  email: string;
+  profileUrl: string;
+}
+
+/** The company's recruiter and founder. Row-level security returns nothing to signed-out visitors. */
+export async function getCompanyContacts(companySlug: string): Promise<CompanyContact[]> {
+  if (!SLUG.test(companySlug)) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("company_contacts")
+    .select("kind, full_name, title, email, profile_url, companies!inner(slug)")
+    .eq("companies.slug", companySlug);
+  return (data ?? [])
+    .map((r) => ({ kind: r.kind as CompanyContact["kind"], name: r.full_name, title: r.title, email: r.email, profileUrl: r.profile_url }))
+    .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "recruiter" ? -1 : 1));
+}
