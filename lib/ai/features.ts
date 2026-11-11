@@ -37,6 +37,8 @@ export const schemas = {
   coverLetter: z.object({ text: z.string().trim().min(200).max(2600) }),
   followUp: z.object({ subject: z.string().trim().min(4).max(110), body: z.string().trim().min(80).max(1400) }),
   negotiate: z.object({ subject: z.string().trim().min(4).max(110), body: z.string().trim().min(80).max(1400) }),
+  interviewQuestions: z.object({ questions: z.array(z.object({ kind: z.enum(["intro", "behavioral", "skill"]), text: z.string().trim().min(15).max(240) })).length(5) }),
+  interviewScore: z.object({ clarity: z.number().int().min(1).max(5), structure: z.number().int().min(1).max(5), specificity: z.number().int().min(1).max(5), feedback: z.string().trim().min(20).max(420), tip: z.string().trim().min(10).max(260) }),
   voiceProfile: z.object({ headline: z.string().trim().max(160), summary: z.string().trim().min(20).max(900), skills: z.array(z.string().trim().min(1).max(40)).max(12) }),
 };
 export type MatchAi = z.infer<typeof schemas.match>;
@@ -88,6 +90,18 @@ export const prompts = {
   followUp: (a: { job: AiJob; status: ApplicationStatus; appliedOn: string; daysSinceUpdate: number; firstName: string }) => ({
     maxTokens: 700,
     user: `Write a polite follow-up email from a candidate who applied ${a.daysSinceUpdate >= 14 ? "a while ago" : "recently"} and has not heard back. 80 to 140 words. Mention the role and the application date, restate interest in one sentence, ask whether there is any update or anything else needed. Do not pressure or complain. Sign off with the first name.\nShape: {"subject":"...","body":"..."}\n${data({ job: { title: a.job.title, company: a.job.company }, status: STATUS_LABELS[a.status], appliedOn: a.appliedOn, daysSinceLastUpdate: a.daysSinceUpdate, firstName: a.firstName })}`,
+  }),
+  interviewQuestions: (job: AiJob) => ({
+    maxTokens: 700,
+    user: `Write exactly 5 mock interview questions for this job, as the "questions" array. Question 1 kind "intro" (why this role, tell me about yourself). Questions 2 and 3 kind "behavioral" (a past situation). Questions 4 and 5 kind "skill" (about the listed skills or responsibilities). Each under 220 characters, plain wording, one question only, no numbering.
+Shape: {"questions":[{"kind":"intro","text":"..."}]}
+${data({ job: jobPayload(job) })}`,
+  }),
+  interviewScore: (a: { job: AiJob; question: string; kind: string; answer: string; seconds: number; limit: number }) => ({
+    maxTokens: 500,
+    user: `Score a candidate's spoken or typed interview answer. Give integer scores 1 to 5 for: clarity (easy to follow, right length, no rambling), structure (for behavioral questions: situation, task, action, result; for skill questions: steps in a sensible order with reasons), specificity (concrete numbers, tools, examples). Be honest: a vague or very short answer scores 1 or 2. Then "feedback": exactly two sentences, the first on what worked, the second on the biggest gap. Then "tip": one concrete thing to do on the next attempt. Judge how the answer is delivered, not whether the candidate's claims are true; do not invent facts about them.
+Shape: {"clarity":1,"structure":1,"specificity":1,"feedback":"...","tip":"..."}
+${data({ role: a.job.title, question: a.question, questionKind: a.kind, answer: trim(a.answer, 3000), secondsUsed: a.seconds, secondsAllowed: a.limit })}`,
   }),
   voiceProfile: (transcript: string) => ({
     maxTokens: 700,

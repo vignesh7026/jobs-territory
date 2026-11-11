@@ -11,6 +11,7 @@ import { BackLink } from "@/components/jobs/back-link";
 import { GhostCard } from "@/components/jobs/ghost-card";
 import { ReachOut } from "@/components/jobs/reach-out";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth/session";
 import { daysUntil, formatSalary, timeAgo } from "@/lib/format";
@@ -157,6 +158,11 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
           <div className="flex flex-wrap gap-2">
             <SaveButton jobId={job.id} jobTitle={job.title} initialSaved={isSaved} signedIn={Boolean(user)} variant="button" />
             <CompareToggle item={{ id: job.id, title: job.title, company: c.name }} variant="button" />
+            {user && (
+              <Link href={`/practice/${job.slug}`} className={buttonVariants({ variant: "secondary" })}>
+                Practise the interview
+              </Link>
+            )}
           </div>
           {match ? (
             <>

@@ -82,6 +82,7 @@ export function CommandPalette({ user }: { user: { role: "candidate" | "admin" }
         go("Applications", "/applications", "status trail history"),
         { id: "go:board", label: "Application board", href: "/applications?view=board", keywords: "kanban columns", group: "Go to" },
         go("Saved jobs and searches", "/saved", "bookmarks"),
+        go("Practice interviews", "/practice", "mock interview questions timer"),
         go("Profile", "/profile", "resume skills account experience"),
       );
       if (user.role === "admin") base.push(go("Admin queue", "/admin/applications", "review change status"));

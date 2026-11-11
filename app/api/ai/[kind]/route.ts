@@ -9,6 +9,7 @@ import { applicationHealth } from "@/lib/applications/health";
 import { getApplication } from "@/lib/applications/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
+import { SECONDS_PER_ANSWER, plainQuestions, plainScore } from "@/lib/interview";
 import { describeRange, plainNegotiation } from "@/lib/negotiate";
 import { getMarketSample } from "@/lib/negotiate-queries";
 import { groundSkills, plainVoiceDraft } from "@/lib/voice-profile";
@@ -19,11 +20,12 @@ import { groundSkills, plainVoiceDraft } from "@/lib/voice-profile";
  * "ai", "cache" or "fallback"; if the model is down the plain, non-AI result comes back instead of an error.
  * 401 signed out, 404 unknown job/application, 422 not applicable, 429 too many requests.
  */
-const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate", "voice-profile"] as const;
+const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate", "voice-profile", "interview-questions", "interview-score"] as const;
 type Kind = (typeof KINDS)[number];
 
 const jobBody = z.object({ jobId: z.string().refine(isUuid, "Invalid job id") });
 const appBody = z.object({ applicationId: z.string().refine(isUuid, "Invalid application id") });
+const scoreBody = jobBody.extend({ question: z.string().trim().min(5).max(300), kind: z.enum(["intro", "behavioral", "skill"]), answer: z.string().trim().min(1).max(3000), seconds: z.number().int().min(0).max(900) });
 const voiceBody = z.object({ transcript: z.string().trim().min(40).max(4000) });
 const negotiateBody = appBody.extend({ offer: z.string().trim().max(40).optional() });
 const reply = (data: unknown, source: string) => NextResponse.json({ data, source }, { headers: { "Cache-Control": "private, no-store" } });
@@ -58,6 +60,28 @@ export async function POST(request: Request, ctx: RouteContext<"/api/ai/[kind]">
       const input = { job: job.ai, status: app.status, appliedOn: app.createdAt, daysSinceUpdate: quietDays, firstName: profile.ai.firstName };
       const p = prompts.followUp(input);
       const r = await ai({ kind: "follow-up", jobId: job.id, inputKey: `${app.id}:${app.status}:${app.updatedAt.slice(0, 10)}`, schema: schemas.followUp, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: plainFollowUp(input) });
+      return reply(r.data, r.source);
+    }
+
+    case "interview-score": {
+      const parsed = scoreBody.safeParse(body);
+      if (!parsed.success) return err("Write or say an answer first.", 400);
+      const job = await loadJob(parsed.data.jobId);
+      if (!job) return err("Job not found.", 404);
+      const a = { job: job.ai, question: parsed.data.question, kind: parsed.data.kind, answer: parsed.data.answer, seconds: parsed.data.seconds, limit: SECONDS_PER_ANSWER };
+      const p = prompts.interviewScore(a);
+      const hash = createHash("sha256").update(a.question + "\n" + a.answer).digest("hex");
+      const r = await ai({ kind: "interview-score", jobId: job.id, inputKey: `${user.id}:${hash}`, schema: schemas.interviewScore, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: plainScore(a.answer, a.kind) });
+      return reply(r.data, r.source);
+    }
+
+    case "interview-questions": {
+      const parsed = jobBody.safeParse(body);
+      if (!parsed.success) return err("Invalid job id.", 400);
+      const job = await loadJob(parsed.data.jobId);
+      if (!job) return err("Job not found.", 404);
+      const p = prompts.interviewQuestions(job.ai);
+      const r = await ai({ kind: "interview-questions", jobId: job.id, schema: schemas.interviewQuestions, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: { questions: plainQuestions(job.ai) } });
       return reply(r.data, r.source);
     }
 
