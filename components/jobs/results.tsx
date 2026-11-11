@@ -24,7 +24,7 @@ export function JobRowSkeleton() {
 }
 
 /** While a new search is loading the list shows skeleton rows (and tells assistive tech it is busy). */
-export function Results({ jobs, matches }: { jobs: JobListItem[]; matches?: Record<string, number> }) {
+export function Results({ jobs, matches, savedIds, signedIn }: { jobs: JobListItem[]; matches?: Record<string, number>; savedIds?: string[]; signedIn?: boolean }) {
   const { pending } = useSearch();
   return (
     <ul className="grid gap-3" aria-busy={pending} aria-label="Search results">
@@ -33,7 +33,7 @@ export function Results({ jobs, matches }: { jobs: JobListItem[]; matches?: Reco
       ) : (
         <AnimatePresence initial>
           {jobs.map((job, i) => (
-            <JobRow key={job.id} job={job} index={i} match={matches?.[job.id]} />
+            <JobRow key={job.id} job={job} index={i} match={matches?.[job.id]} saved={savedIds?.includes(job.id)} signedIn={signedIn} />
           ))}
         </AnimatePresence>
       )}

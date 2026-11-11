@@ -15,6 +15,9 @@ import { getJobBySlug, getMyApplication, getMyResumeName } from "@/lib/jobs/deta
 import { LEVEL_LABELS, MODE_LABELS, TYPE_LABELS, type WorkMode } from "@/lib/jobs/filters";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
 import { getMatchProfile } from "@/lib/profile/queries";
+import { getSavedJobIds } from "@/lib/saved/queries";
+import { CompareToggle } from "@/components/compare/compare-toggle";
+import { SaveButton } from "@/components/saved/save-button";
 
 const MODE_ICON: Record<WorkMode, React.ReactNode> = { onsite: <Building2 />, hybrid: <ArrowLeftRight />, remote: <Laptop /> };
 
@@ -48,6 +51,8 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
 
   const matchProfile = await getMatchProfile(user?.id ?? null);
   const match = matchProfile ? computeMatch(matchProfile, { skills: job.skills, level: job.level, workMode: job.workMode, location: job.location, title: job.title }) : null;
+
+  const isSaved = (await getSavedJobIds(user?.id ?? null)).has(job.id);
 
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.currency, job.jobType);
   const closesInDays = daysUntil(job.closesAt);
@@ -144,6 +149,10 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
             resumeName={resumeName}
             initialApplication={application}
           />
+          <div className="flex flex-wrap gap-2">
+            <SaveButton jobId={job.id} jobTitle={job.title} initialSaved={isSaved} signedIn={Boolean(user)} variant="button" />
+            <CompareToggle item={{ id: job.id, title: job.title, company: c.name }} variant="button" />
+          </div>
           {match ? (
             <>
               <MatchCard match={match} explanation={fallbackExplanation(match, job.skills.length)} jobSkillCount={job.skills.length} jobId={job.id} />

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { PaletteButton } from "@/components/shell/command-palette";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { UserMenu, type MenuUser } from "@/components/shell/user-menu";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ export function Navbar({ user }: { user: MenuUser | null }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
+          <PaletteButton />
           <ThemeToggle />
           {user ? (
             <div className="hidden md:block">

@@ -3,10 +3,11 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { useSearch } from "@/components/jobs/search-context";
+import { SaveSearchButton } from "@/components/saved/save-search-button";
 import { SORTS, SORT_LABELS, activeChips, withFilters, type JobFilters } from "@/lib/jobs/filters";
 import { t } from "@/lib/motion";
 
-export function ResultsToolbar({ total }: { total: number }) {
+export function ResultsToolbar({ total, signedIn }: { total: number; signedIn: boolean }) {
   const { filters, push, pending } = useSearch();
   const reduce = useReducedMotion();
   const chips = activeChips(filters);
@@ -22,7 +23,8 @@ export function ResultsToolbar({ total }: { total: number }) {
             </>
           )}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <SaveSearchButton signedIn={signedIn} />
           <label htmlFor="sort" className="text-sm text-muted">
             Sort by
           </label>

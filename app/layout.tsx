@@ -4,6 +4,9 @@ import "./globals.css";
 import { Navbar } from "@/components/shell/navbar";
 import { Toaster } from "@/components/shell/toaster";
 import { ThemeScript } from "@/components/shell/theme-script";
+import { CommandPalette } from "@/components/shell/command-palette";
+import { CompareProvider } from "@/components/compare/compare-provider";
+import { CompareTray } from "@/components/compare/compare-tray";
 import { getCurrentUser } from "@/lib/auth/session";
 
 const manrope = Manrope({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-manrope", display: "swap" });
@@ -33,6 +36,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <Toaster>
+          <CompareProvider>
           <Navbar user={user ? { fullName: user.fullName, email: user.email, role: user.role } : null} />
           <main id="main" className="flex-1">
             {children}
@@ -43,6 +47,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <span>Demo data only. Companies and contacts are illustrative.</span>
             </div>
           </footer>
+          <CompareTray />
+          <CommandPalette user={user ? { role: user.role } : null} />
+          </CompareProvider>
         </Toaster>
       </body>
     </html>

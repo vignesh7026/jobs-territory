@@ -15,6 +15,7 @@ import { searchJobs } from "@/lib/jobs/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { computeMatch } from "@/lib/match";
 import { getMatchProfile } from "@/lib/profile/queries";
+import { getSavedJobIds } from "@/lib/saved/queries";
 
 export async function generateMetadata(props: PageProps<"/jobs">): Promise<Metadata> {
   const { q } = parseFilters(await props.searchParams);
@@ -33,6 +34,8 @@ export default async function JobsPage(props: PageProps<"/jobs">) {
   const mp = await getMatchProfile(user?.id ?? null);
   const matches = mp ? Object.fromEntries(result.jobs.map((j) => [j.id, computeMatch(mp, { skills: j.skills, level: j.level, workMode: j.workMode, location: j.location, title: j.title }).score])) : undefined;
 
+  const savedIds = [...(await getSavedJobIds(user?.id ?? null))];
+
   const cleared: JobFilters = { ...filters, q: "", location: "", types: [], modes: [], levels: [], page: 1, sort: "newest" };
 
   return (
@@ -50,10 +53,10 @@ export default async function JobsPage(props: PageProps<"/jobs">) {
           </aside>
 
           <div>
-            <ResultsToolbar total={result.total} />
+            <ResultsToolbar total={result.total} signedIn={Boolean(user)} />
             {result.jobs.length > 0 ? (
               <>
-                <Results jobs={result.jobs} matches={matches} />
+                <Results jobs={result.jobs} matches={matches} savedIds={savedIds} signedIn={Boolean(user)} />
                 <Pagination filters={filters} page={result.page} pageCount={result.pageCount} />
               </>
             ) : (
