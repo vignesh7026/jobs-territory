@@ -13,7 +13,8 @@
     "db:reset": "npm run seed:gen && supabase db reset",
     "db:test": "node scripts/db-test.mjs",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.mts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.17",

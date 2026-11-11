@@ -17,7 +17,7 @@ export function FormField({ id, label, error, hint, className, children }: Field
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   return (
-    <div className={cn("grid gap-1.5", className)}>
+    <div className={cn("grid content-start gap-1.5", className)}>
       <Label htmlFor={id}>{label}</Label>
       {children({ id, "aria-invalid": Boolean(error), "aria-describedby": [hintId, errorId].filter(Boolean).join(" ") || undefined })}
       {hint && !error && (

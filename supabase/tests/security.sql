@@ -73,6 +73,14 @@ select pg_temp.expect_error($$insert into public.application_events (application
 select pg_temp.expect_error($$select public.admin_set_application_status('00000000-0000-0000-0000-000000000000', 'under_review')$$, '42501', 'candidate cannot call the admin RPC');
 select pg_temp.reset();
 
+-- candidate: resume path must stay inside their own folder
+select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
+update public.profiles set resume_path = '33333333-3333-4333-8333-333333333333/cv.pdf';
+select pg_temp.check_that((select resume_path from public.profiles) = '33333333-3333-4333-8333-333333333333/cv.pdf', 'candidate can point resume_path at their own folder');
+select pg_temp.expect_error($$update public.profiles set resume_path = '11111111-1111-4111-8111-111111111111/cv.pdf'$$, '23514', 'candidate cannot point resume_path at another user''s folder');
+select pg_temp.expect_error($$update public.profiles set experience = '{"not":"an array"}'::jsonb$$, '23514', 'experience must be a JSON array');
+select pg_temp.reset();
+
 -- candidate: apply -----------------------------------------------------
 select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
 insert into public.applications (job_id, cover_note) select id, 'Hello' from public.jobs where slug = 'frontend-developer-intern-brightwell';
