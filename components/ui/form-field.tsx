@@ -26,7 +26,7 @@ export function FormField({ id, label, error, hint, className, children }: Field
         </p>
       )}
       {error && (
-        <p id={errorId} className="text-sm text-danger">
+        <p id={errorId} className="text-sm text-danger-fg">
           {error}
         </p>
       )}

@@ -60,7 +60,7 @@ export function ExperienceList({ items, onChange, errorFor, touch }: Common & { 
               {(c) => <Textarea {...c} rows={3} value={it.description} onChange={(e) => set(i, { description: e.target.value })} onBlur={() => touch(p("description"))} />}
             </FormField>
             <div>
-              <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)} className="text-danger hover:bg-danger/10">
+              <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)} className="text-danger-fg hover:bg-danger/10">
                 <Trash2 aria-hidden="true" /> Remove role
               </Button>
             </div>
@@ -99,7 +99,7 @@ export function EducationList({ items, onChange, errorFor, touch }: Common & { i
               {(c) => <Input {...c} value={it.year} onChange={(e) => set(i, { year: e.target.value })} onBlur={() => touch(p("year"))} inputMode="numeric" />}
             </FormField>
             <div>
-              <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)} className="text-danger hover:bg-danger/10">
+              <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)} className="text-danger-fg hover:bg-danger/10">
                 <Trash2 aria-hidden="true" /> Remove
               </Button>
             </div>

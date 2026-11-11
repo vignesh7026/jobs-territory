@@ -86,3 +86,26 @@ describe("resume file rules", () => {
     expect(safeFileName("")).toBe("resume.pdf");
   });
 });
+
+import { allowedNext, canMove, isTerminal, isUndoable } from "@/lib/applications/status";
+
+describe("application status rules", () => {
+  it("allows only the forward step or rejection", () => {
+    expect(allowedNext("applied")).toEqual(["under_review", "rejected"]);
+    expect(canMove("under_review", "shortlisted")).toBe(true);
+    expect(canMove("under_review", "interview")).toBe(false); // cannot skip a stage
+    expect(canMove("interview", "applied")).toBe(false); // cannot go backwards
+    expect(canMove("offered", "rejected")).toBe(true); // an offer can still be withdrawn
+  });
+  it("treats rejected as final", () => {
+    expect(isTerminal("rejected")).toBe(true);
+    expect(allowedNext("rejected")).toEqual([]);
+    expect(isTerminal("offered")).toBe(false);
+  });
+  it("lets a candidate withdraw only an untouched, recent application", () => {
+    const now = new Date("2026-11-11T12:00:00Z");
+    expect(isUndoable("applied", "2026-11-11T11:55:00Z", now)).toBe(true);
+    expect(isUndoable("applied", "2026-11-11T11:49:00Z", now)).toBe(false); // 11 minutes
+    expect(isUndoable("under_review", "2026-11-11T11:59:00Z", now)).toBe(false);
+  });
+});

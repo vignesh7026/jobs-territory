@@ -14,12 +14,12 @@ export const STATUS_ICON: Record<ApplicationStatus, React.ComponentType<{ classN
 
 /** Token-based colours, from the brief: text uses the status colour, the background is a 10% tint of it. */
 export const STATUS_STYLE: Record<ApplicationStatus, string> = {
-  applied: "bg-status-applied/10 text-status-applied",
-  under_review: "bg-status-review/10 text-status-review",
-  shortlisted: "bg-status-shortlisted/10 text-status-shortlisted",
-  interview: "bg-status-interview/10 text-status-interview",
-  offered: "bg-status-offered/10 text-status-offered",
-  rejected: "bg-status-rejected/10 text-status-rejected",
+  applied: "bg-status-applied/10 text-status-applied-fg",
+  under_review: "bg-status-review/10 text-status-review-fg",
+  shortlisted: "bg-status-shortlisted/10 text-status-shortlisted-fg",
+  interview: "bg-status-interview/10 text-status-interview-fg",
+  offered: "bg-status-offered/10 text-status-offered-fg",
+  rejected: "bg-status-rejected/10 text-status-rejected-fg",
 };
 
 export function StatusBadge({ status, className }: { status: ApplicationStatus; className?: string }) {

@@ -110,7 +110,7 @@ export function ApplyController({ job, signedIn, resumeName, initialApplication 
         <motion.div initial={reduce ? false : { scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 22 }} className={cn("flex items-center gap-3", compact && "justify-between")}>
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-sm font-medium">
-              <Check className="size-4 text-success" aria-hidden="true" /> Applied {timeAgo(application.createdAt).toLowerCase()}
+              <Check className="size-4 text-success-fg" aria-hidden="true" /> Applied {timeAgo(application.createdAt).toLowerCase()}
             </p>
             {!compact && <StatusBadge status={application.status} className="mt-2" />}
           </div>
@@ -148,7 +148,7 @@ export function ApplyController({ job, signedIn, resumeName, initialApplication 
       <Card ref={cardRef} className="hidden p-5 lg:block">
         <p className="text-xs font-medium text-muted">Salary</p>
         <p className="mt-0.5 text-xl font-heading font-bold tabular-nums">{job.salary}</p>
-        {closing !== null && !job.closed && <p className={cn("mt-2 text-sm", closing <= 7 ? "text-warning" : "text-muted")}>{closing === 0 ? "Closes today" : `Closes in ${closing} ${closing === 1 ? "day" : "days"}`}</p>}
+        {closing !== null && !job.closed && <p className={cn("mt-2 text-sm", closing <= 7 ? "text-warning-fg" : "text-muted")}>{closing === 0 ? "Closes today" : `Closes in ${closing} ${closing === 1 ? "day" : "days"}`}</p>}
         <div className="mt-4">{action(false)}</div>
         {signedIn && !application && !job.closed && <p className="mt-3 text-xs text-muted">{resumeName ? `Your resume (${resumeName}) is attached.` : "You have no resume on file."}</p>}
       </Card>
@@ -253,7 +253,7 @@ function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: b
             Cover note <span className="font-normal text-muted">(optional)</span>
           </label>
           <Textarea id="coverNote" rows={6} value={note} onChange={(e) => setNote(e.target.value)} maxLength={3000} aria-invalid={Boolean(fieldError)} aria-describedby="coverNote-hint" placeholder="Two or three sentences on why this role and why you." />
-          <p id="coverNote-hint" className={cn("text-xs", fieldError ? "text-danger" : "text-muted")}>
+          <p id="coverNote-hint" className={cn("text-xs", fieldError ? "text-danger-fg" : "text-muted")}>
             {fieldError ?? `${note.length} of 3000 characters`}
           </p>
         </div>

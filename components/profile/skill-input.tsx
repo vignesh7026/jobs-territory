@@ -66,7 +66,7 @@ export function SkillInput({ id, skills, onChange, error }: Props) {
           <Plus aria-hidden="true" /> Add
         </Button>
       </div>
-      {error && <p className="mt-1.5 text-sm text-danger">{error}</p>}
+      {error && <p className="mt-1.5 text-sm text-danger-fg">{error}</p>}
     </div>
   );
 }

@@ -24,6 +24,18 @@
   --st-interview: #2f5d8a;
   --st-offered: #2f7d4f;
   --st-rejected: #b42318;
+  /* Text variants. The values above are fills/borders/icons. Used as text some fall below WCAG AA, so text uses the same
+     hue nudged toward black just far enough (tests/contrast.test.ts enforces 4.5:1). */
+  --st-applied-fg: color-mix(in srgb, var(--st-applied) 97%, black);
+  --st-review-fg: color-mix(in srgb, var(--st-review) 78%, black);
+  --st-shortlisted-fg: var(--st-shortlisted);
+  --st-interview-fg: var(--st-interview);
+  --st-offered-fg: color-mix(in srgb, var(--st-offered) 93%, black);
+  --st-rejected-fg: var(--st-rejected);
+  --success-fg: color-mix(in srgb, var(--success) 93%, black);
+  --warning-fg: color-mix(in srgb, var(--warning) 78%, black);
+  --danger-fg: var(--danger);
+  --info-fg: var(--info);
   color-scheme: light;
 }
 
@@ -38,6 +50,17 @@
   --primary-soft: #12302d;
   --primary-fg: #0f1417;
   --accent: #f08a5d;
+  /* Dark theme: the same hues nudged toward white. */
+  --st-applied-fg: color-mix(in srgb, var(--st-applied) 76%, white);
+  --st-review-fg: color-mix(in srgb, var(--st-review) 92%, white);
+  --st-shortlisted-fg: color-mix(in srgb, var(--st-shortlisted) 70%, white);
+  --st-interview-fg: color-mix(in srgb, var(--st-interview) 69%, white);
+  --st-offered-fg: color-mix(in srgb, var(--st-offered) 78%, white);
+  --st-rejected-fg: color-mix(in srgb, var(--st-rejected) 66%, white);
+  --success-fg: color-mix(in srgb, var(--success) 78%, white);
+  --warning-fg: color-mix(in srgb, var(--warning) 92%, white);
+  --danger-fg: color-mix(in srgb, var(--danger) 66%, white);
+  --info-fg: color-mix(in srgb, var(--info) 69%, white);
   color-scheme: dark;
 }
 

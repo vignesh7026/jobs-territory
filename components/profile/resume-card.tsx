@@ -68,7 +68,7 @@ export function ResumeCard({ resume, onChange }: { resume: ResumeState | null; o
               Open
             </a>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setConfirm(true)} disabled={busy !== null} aria-label="Remove resume" className="text-danger hover:bg-danger/10">
+          <Button variant="ghost" size="icon" onClick={() => setConfirm(true)} disabled={busy !== null} aria-label="Remove resume" className="text-danger-fg hover:bg-danger/10">
             <Trash2 />
           </Button>
         </div>
@@ -82,7 +82,7 @@ export function ResumeCard({ resume, onChange }: { resume: ResumeState | null; o
         {busy === "upload" ? "Uploading" : resume ? "Replace PDF" : "Upload PDF"}
       </Button>
       {error && (
-        <p id="resume-error" role="alert" className="mt-2 text-sm text-danger">
+        <p id="resume-error" role="alert" className="mt-2 text-sm text-danger-fg">
           {error}
         </p>
       )}

@@ -63,7 +63,7 @@ export function Toaster({ children }: { children: React.ReactNode }) {
                 x.tone === "error" ? "border-danger/50" : "border-border",
               )}
             >
-              {x.tone === "error" ? <AlertCircle className="mt-0.5 size-5 shrink-0 text-danger" /> : x.tone === "success" ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" /> : null}
+              {x.tone === "error" ? <AlertCircle className="mt-0.5 size-5 shrink-0 text-danger-fg" /> : x.tone === "success" ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success-fg" /> : null}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{x.title}</p>
                 {x.description && <p className="mt-0.5 text-sm text-muted">{x.description}</p>}

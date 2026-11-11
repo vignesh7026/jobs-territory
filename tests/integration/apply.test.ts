@@ -146,3 +146,20 @@ describe("admin status changes", () => {
     expect(asCandidate.error?.code).toBe("42501");
   });
 });
+
+import { STATUSES, canMove } from "@/lib/applications/status";
+
+describe("status rules: TypeScript and database agree", () => {
+  it("every one of the 36 (from, to) pairs is allowed by both or by neither", async () => {
+    const db = fresh();
+    const mismatches: string[] = [];
+    for (const from of STATUSES) {
+      for (const to of STATUSES) {
+        const { data, error } = await db.rpc("application_transition_allowed", { p_from: from, p_to: to });
+        expect(error).toBeNull();
+        if (data !== canMove(from, to)) mismatches.push(`${from} -> ${to}: db=${data} ts=${canMove(from, to)}`);
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+});

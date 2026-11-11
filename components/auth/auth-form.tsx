@@ -39,7 +39,7 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
 
       {state?.message && (
         <div role="alert" className="flex items-start gap-2 rounded-md border border-danger/40 bg-danger/10 p-3 text-sm">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden="true" />
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-danger-fg" aria-hidden="true" />
           <span>{state.message}</span>
         </div>
       )}

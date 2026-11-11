@@ -50,3 +50,15 @@ export function daysUntil(iso: string | null, now: Date = new Date()): number | 
   const days = Math.ceil((new Date(iso).getTime() - now.getTime()) / 864e5);
   return days >= 0 ? days : null;
 }
+
+/** "8 Nov 2026" */
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
+}
+
+/** "8 Nov 2026, 4:12 pm" */
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  const time = d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" });
+  return `${formatDate(iso)}, ${time}`;
+}
