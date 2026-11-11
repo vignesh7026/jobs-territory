@@ -52,9 +52,9 @@ export function ApplyController({ job, signedIn, resumeName, initialApplication 
 
   const loginHref = `/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`;
 
-  async function send(coverNote: string): Promise<SendResult> {
+  async function send(coverNote: string, anonymous: boolean): Promise<SendResult> {
     try {
-      const res = await fetch("/api/applications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jobId: job.id, coverNote }) });
+      const res = await fetch("/api/applications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jobId: job.id, coverNote, anonymous }) });
       const body = (await res.json().catch(() => ({}))) as { id?: string; status?: ApplicationStatus; createdAt?: string; error?: string; fieldErrors?: Record<string, string> };
 
       if (res.status === 201 && body.id) {
@@ -177,9 +177,10 @@ export function ApplyController({ job, signedIn, resumeName, initialApplication 
 
 type Phase = "idle" | "sending" | "sent";
 
-function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: boolean; onClose: () => void; job: ApplyJob; resumeName: string | null; send: (note: string) => Promise<SendResult>; onSent: (id: string) => void }) {
+function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: boolean; onClose: () => void; job: ApplyJob; resumeName: string | null; send: (note: string, anonymous: boolean) => Promise<SendResult>; onSent: (id: string) => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [note, setNote] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string>();
   const [drafting, setDrafting] = useState(false);
@@ -215,7 +216,7 @@ function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: b
     setError(undefined);
     setFieldError(undefined);
     setPhase("sending");
-    const result = await send(note.trim());
+    const result = await send(note.trim(), anonymous);
     if (!result.ok) {
       setPhase("idle"); // the note stays exactly as typed
       setError(result.message);
@@ -229,6 +230,7 @@ function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: b
       onSent(id);
       setPhase("idle");
       setNote("");
+      setAnonymous(false);
     }, reduce ? 150 : 650);
   }
 
@@ -289,6 +291,14 @@ function ApplyDialog({ open, onClose, job, resumeName, send, onSent }: { open: b
             {fieldError ?? `${note.length} of 3000 characters`}
           </p>
         </div>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-3 text-sm">
+          <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} className="mt-0.5 size-4 accent-[var(--primary)]" data-testid="anonymous-toggle" />
+          <span>
+            <span className="font-medium">Apply anonymously</span>
+            <span className="block text-xs text-muted">Reviewers see your skills and experience first. Your name, college, employers and resume stay hidden until you are shortlisted. Do not put your name in the cover note.</span>
+          </span>
+        </label>
 
         {error && (
           <p role="alert" className="rounded-md border border-danger/40 bg-danger/10 p-3 text-sm">

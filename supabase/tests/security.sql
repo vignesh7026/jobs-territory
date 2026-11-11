@@ -165,5 +165,31 @@ select pg_temp.act_as(null, 'anon');
 select pg_temp.expect_error('select * from public.roadmap_items', '42501', 'anon cannot read roadmaps');
 select pg_temp.reset();
 
+-- anonymous applications: blind until shortlisted ----------------------
+update public.applications set anonymous = true where candidate_id = '11111111-1111-4111-8111-111111111111' and job_id = (select id from public.jobs where slug = 'full-stack-engineer-ats');
+insert into storage.objects (bucket_id, name) values ('resumes', '11111111-1111-4111-8111-111111111111/1-resume.pdf');
+
+select pg_temp.act_as('22222222-2222-4222-8222-222222222222');
+select pg_temp.check_that((select count(*) from public.profiles where id = '11111111-1111-4111-8111-111111111111') = 0, 'blind: admin cannot read the candidate profile row');
+select pg_temp.check_that((select count(*) from storage.objects where bucket_id = 'resumes' and name like '11111111-1111-4111-8111-111111111111/%') = 0, 'blind: admin cannot read the resume file');
+select pg_temp.check_that((select count(*) from public.applications) >= 7, 'blind: the application row itself is still in the queue');
+select pg_temp.check_that((select array_length(skills, 1) from public.blind_profile((select id from public.applications where anonymous))) > 3, 'blind: reviewer gets the skills');
+select pg_temp.check_that((select (roles::text !~ 'Routely|Kovai') and (degrees::text !~ 'PSG') from public.blind_profile((select id from public.applications where anonymous))), 'blind: no employers or college in the stripped view');
+select pg_temp.reset();
+
+select pg_temp.act_as('11111111-1111-4111-8111-111111111111');
+select pg_temp.expect_error($$update public.applications set anonymous = false$$, '42501', 'candidate cannot flip the anonymous flag afterwards');
+select pg_temp.expect_error($$select * from public.blind_profile((select id from public.applications where anonymous))$$, '42501', 'a candidate cannot call the reviewer view');
+select pg_temp.check_that((select count(*) from public.profiles) = 1, 'the candidate still reads their own profile');
+select pg_temp.reset();
+
+select pg_temp.act_as('22222222-2222-4222-8222-222222222222');
+select public.admin_set_application_status((select id from public.applications where anonymous), 'under_review', 'Reviewing blind');
+select pg_temp.check_that((select count(*) from public.profiles where id = '11111111-1111-4111-8111-111111111111') = 0, 'blind: still hidden while under review');
+select public.admin_set_application_status((select id from public.applications where anonymous), 'shortlisted', 'Shortlisted on skills');
+select pg_temp.check_that((select count(*) from public.profiles where id = '11111111-1111-4111-8111-111111111111') = 1, 'revealed once shortlisted: profile readable');
+select pg_temp.check_that((select count(*) from storage.objects where bucket_id = 'resumes' and name like '11111111-1111-4111-8111-111111111111/%') = 1, 'revealed once shortlisted: resume readable');
+select pg_temp.reset();
+
 rollback;
 \echo ALL SECURITY CHECKS PASSED

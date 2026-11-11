@@ -13,6 +13,7 @@ import { StatusTimeline } from "@/components/applications/status-timeline";
 import { WithdrawButton } from "@/components/applications/withdraw-button";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { Card } from "@/components/ui/card";
+import { pseudonym, yearsOfExperience } from "@/lib/anonymous";
 import { requireUser } from "@/lib/auth/session";
 import { getApplication } from "@/lib/applications/queries";
 import { formatDate, timeAgo } from "@/lib/format";
@@ -77,6 +78,13 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
         </div>
 
         <aside className="grid gap-4">
+          {isOwner && app.anonymous && (
+            <Card className="p-5" data-testid="anon-note">
+              <h2 className="text-base">Applied anonymously</h2>
+              <p className="mt-1 text-sm text-muted">{app.blind ? "Reviewers see your skills and experience, not your name, college, employers or resume. That changes when you are shortlisted." : "You were shortlisted, so reviewers can now see your name and resume."}</p>
+            </Card>
+          )}
+
           {health && (
             <Card className="p-5">
               <h2 className="mb-3 text-base">Application health</h2>
@@ -96,13 +104,64 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
 
           {isAdminView && (
             <>
-              <Card className="p-5">
-                <h2 className="text-base">Candidate</h2>
-                <p className="mt-2 text-sm font-medium">{app.candidate?.fullName || "Unnamed candidate"}</p>
-                {app.candidate?.headline && <p className="mt-1 text-sm text-muted">{app.candidate.headline}</p>}
-                {app.candidate?.location && <p className="mt-1 text-sm text-muted">{app.candidate.location}</p>}
-              </Card>
-              <AdminStatusPanel applicationId={app.id} status={app.status} candidateName={app.candidate?.fullName || "The candidate"} />
+              {app.blind ? (
+                <Card className="p-5" data-testid="blind-card">
+                  <h2 className="text-base">{pseudonym(app.id)}</h2>
+                  <p className="mt-1 text-xs text-muted">Applied anonymously. Name, college, employers and resume are hidden until you shortlist.</p>
+                  {app.blindView ? (
+                    <div className="mt-4 grid gap-4 text-sm">
+                      <p>
+                        <span className="font-medium">About {yearsOfExperience(app.blindView.roles.map((r) => r.period))} years</span> of experience
+                      </p>
+                      <div>
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted">Skills</p>
+                        <ul className="mt-1.5 flex flex-wrap gap-1.5">
+                          {app.blindView.skills.map((s) => (
+                            <li key={s} className="rounded-md border border-border bg-surface px-2 py-1 text-xs">
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      {app.blindView.roles.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted">Experience</p>
+                          <ul className="mt-1.5 grid gap-2">
+                            {app.blindView.roles.map((r, i) => (
+                              <li key={i}>
+                                <span className="font-medium">{r.title}</span> <span className="text-muted">({r.period})</span>
+                                {r.description && <span className="block text-muted">{r.description}</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {app.blindView.degrees.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted">Education</p>
+                          <ul className="mt-1.5 grid gap-1">
+                            {app.blindView.degrees.map((d, i) => (
+                              <li key={i}>
+                                {d.degree} {d.year && <span className="text-muted">({d.year})</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-muted">No skills or experience on file.</p>
+                  )}
+                </Card>
+              ) : (
+                <Card className="p-5">
+                  <h2 className="text-base">Candidate</h2>
+                  <p className="mt-2 text-sm font-medium">{app.candidate?.fullName || "Unnamed candidate"}</p>
+                  {app.candidate?.headline && <p className="mt-1 text-sm text-muted">{app.candidate.headline}</p>}
+                  {app.candidate?.location && <p className="mt-1 text-sm text-muted">{app.candidate.location}</p>}
+                </Card>
+              )}
+              <AdminStatusPanel applicationId={app.id} status={app.status} candidateName={app.blind ? pseudonym(app.id) : app.candidate?.fullName || "The candidate"} />
             </>
           )}
 
@@ -110,7 +169,7 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
             <h2 className="text-base">{isOwner ? "What you sent" : "What they sent"}</h2>
             <div className="mt-3 flex items-center gap-2 text-sm">
               <FileText className="size-4 shrink-0 text-muted" aria-hidden="true" />
-              {app.resumeName ? <span className="truncate">{app.resumeName}</span> : <span className="text-muted">No resume attached</span>}
+              {isAdminView && app.blind ? <span className="text-muted">Hidden until shortlisted</span> : app.resumeName ? <span className="truncate">{app.resumeName}</span> : <span className="text-muted">No resume attached</span>}
             </div>
             <h3 className="mt-4 text-sm font-medium">Cover note</h3>
             {app.coverNote ? <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">{app.coverNote}</p> : <p className="mt-1 text-sm text-muted">No cover note.</p>}

@@ -13,6 +13,8 @@ export const applySchema = z.object({
     .max(3000, "Keep the cover note under 3000 characters.")
     .optional()
     .transform((v) => (v ? v : null)),
+  /** hide name, college, employers and resume from reviewers until shortlisted */
+  anonymous: z.boolean().optional().default(false),
 });
 export type ApplyInput = z.input<typeof applySchema>;
 
@@ -40,7 +42,7 @@ export async function applyToJob(db: Db, input: unknown): Promise<ApplyResult> {
   if (!job) return { status: 404, error: "That job no longer exists." };
   if (job.closes_at && new Date(job.closes_at) <= new Date()) return { status: 410, error: "This job is no longer accepting applications." };
 
-  const { data, error } = await db.from("applications").insert({ job_id: job.id, cover_note: parsed.data.coverNote }).select("id, status, created_at").single();
+  const { data, error } = await db.from("applications").insert({ job_id: job.id, cover_note: parsed.data.coverNote, anonymous: parsed.data.anonymous }).select("id, status, created_at").single();
   if (error) {
     if (error.code === "23505") return { status: 409, error: "Already applied" };
     if (error.code === "42501") return { status: 410, error: "This job is no longer accepting applications." }; // closed between the check and the insert

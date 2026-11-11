@@ -71,14 +71,14 @@ isOneToOne: false
                   ]
                 },"applications": {
                   Row: {
-                    "candidate_id": string,"cover_note": string | null,"created_at": string,"id": string,"job_id": string,"resume_path": string | null,"status": Database["public"]['Enums']["application_status"],"updated_at": string
+                    "anonymous": boolean,"candidate_id": string,"cover_note": string | null,"created_at": string,"id": string,"job_id": string,"resume_path": string | null,"status": Database["public"]['Enums']["application_status"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id": string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
+                    "anonymous"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id": string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
                   }
                   Update: {
-                    "candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id"?: string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
+                    "anonymous"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id"?: string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -237,7 +237,8 @@ isOneToOne: false
           Functions: {
             "admin_set_application_status":
 { Args: { "p_application_id": string,"p_note"?: string,"p_status": Database["public"]['Enums']["application_status"] }; Returns: {
-              "candidate_id": string,
+              "anonymous": boolean,
+"candidate_id": string,
 "cover_note": string | null,
 "created_at": string,
 "id": string,
@@ -255,6 +256,11 @@ isOneToOne: false
 "application_transition_allowed":
 { Args: { "p_from": Database["public"]['Enums']["application_status"],"p_to": Database["public"]['Enums']["application_status"] }; Returns: boolean
                            },
+"blind_profile":
+{ Args: { "p_application_id": string }; Returns: {
+              "degrees": Json,"roles": Json,"skills": (string)[]
+            }[]
+                           },
 "company_response":
 { Args: { "p_slug": string }; Returns: {
               "applications": number,"median_hours": number,"replied": number
@@ -262,6 +268,9 @@ isOneToOne: false
                            },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"is_blind_candidate":
+{ Args: { "p_candidate": string }; Returns: boolean
                            },
 "jobs_tsquery":
 { Args: { "p_q": string }; Returns: unknown

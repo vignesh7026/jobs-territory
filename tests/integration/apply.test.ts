@@ -22,6 +22,22 @@ async function jobId(slug: string): Promise<string> {
   return data!.id;
 }
 
+describe("anonymous applications", () => {
+  it("stores the flag when asked, defaults to false, and the candidate cannot change it afterwards", async () => {
+    const c = await newCandidate();
+    const a = await applyToJob(c, { jobId: await jobId("fraud-analyst"), anonymous: true });
+    const b = await applyToJob(c, { jobId: await jobId("analytics-engineer") });
+    expect(a.status).toBe(201);
+    expect(b.status).toBe(201);
+    if (a.status !== 201 || b.status !== 201) return;
+    const { data: rows } = await c.from("applications").select("id, anonymous");
+    expect(rows?.find((r) => r.id === a.application.id)?.anonymous).toBe(true);
+    expect(rows?.find((r) => r.id === b.application.id)?.anonymous).toBe(false);
+    const flip = await c.from("applications").update({ anonymous: false }).eq("id", a.application.id);
+    expect(flip.error?.code).toBe("42501");
+  });
+});
+
 describe("applyToJob", () => {
   let candidate: Db;
   let openJob: string;

@@ -67,6 +67,7 @@ export default async function AdminApplicationsPage(props: PageProps<"/admin/app
                       <Link href={`/applications/${r.id}`} className="hover:text-primary">
                         {r.candidateName}
                       </Link>
+                      {r.anonymous && <span className="ml-2 rounded-md border border-border px-1.5 py-0.5 text-xs font-normal text-muted">Anonymous</span>}
                     </td>
                     <td className="px-4 py-3">
                       {r.job.title} <span className="text-muted">&middot; {r.job.company}</span>
@@ -89,7 +90,10 @@ export default async function AdminApplicationsPage(props: PageProps<"/admin/app
               <li key={r.id}>
                 <Link href={`/applications/${r.id}`} className="grid gap-2 rounded-lg border border-border bg-surface p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="font-medium">{r.candidateName}</p>
+                    <p className="font-medium">
+                      {r.candidateName}
+                      {r.anonymous && <span className="ml-2 rounded-md border border-border px-1.5 py-0.5 text-xs font-normal text-muted">Anonymous</span>}
+                    </p>
                     <StatusBadge status={r.status} />
                   </div>
                   <p className="text-sm text-muted">

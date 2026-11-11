@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { PIPELINE, isStatus, isUndoable, type ApplicationStatus } from "@/lib/applications/status";
+import { isBlind, pseudonym } from "@/lib/anonymous";
 
 export interface ApplicationEvent {
   id: number;
@@ -28,6 +29,12 @@ export interface ApplicationDetail extends ApplicationSummary {
   /** can still be withdrawn (untouched and under ten minutes old) */
   undoable: boolean;
   candidate: { fullName: string; headline: string | null; location: string | null } | null;
+  /** chosen by the candidate when applying */
+  anonymous: boolean;
+  /** anonymous and not yet shortlisted: reviewers get the stripped view only */
+  blind: boolean;
+  /** what a reviewer may see while blind */
+  blindView: { skills: string[]; roles: { title: string; period: string; description: string }[]; degrees: { degree: string; year: string }[] } | null;
 }
 
 type JobJoin = { id: string; slug: string; title: string; location: string; companies: { name: string } | { name: string }[] | null };
@@ -78,7 +85,7 @@ export async function getApplication(id: string): Promise<ApplicationDetail | nu
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
-    .select(`id, status, created_at, updated_at, candidate_id, cover_note, resume_path, ${JOB}, application_events(id, status, note, actor_id, created_at)`)
+    .select(`id, status, created_at, updated_at, candidate_id, cover_note, resume_path, anonymous, ${JOB}, application_events(id, status, note, actor_id, created_at)`)
     .eq("id", id)
     .order("created_at", { referencedTable: "application_events", ascending: true })
     .maybeSingle();
@@ -89,7 +96,15 @@ export async function getApplication(id: string): Promise<ApplicationDetail | nu
   if (!base) return null;
   const events = (data.application_events ?? []).filter((e) => isStatus(e.status)).map((e) => ({ id: e.id, status: e.status as ApplicationStatus, note: e.note, actorId: e.actor_id, createdAt: e.created_at }));
 
+  const blind = isBlind({ anonymous: data.anonymous, statuses: [base.status, ...events.map((e) => e.status)] });
   const { data: candidate } = await supabase.from("profiles").select("full_name, headline, location").eq("id", data.candidate_id).maybeSingle();
+  let blindView: ApplicationDetail["blindView"] = null;
+  if (blind && !candidate) {
+    // An admin cannot read a blind profile row at all; this returns skills, titles and degrees only.
+    const { data: bp } = await supabase.rpc("blind_profile", { p_application_id: id });
+    const row = bp?.[0];
+    if (row) blindView = { skills: row.skills, roles: (row.roles as { title: string; period: string; description: string }[]) ?? [], degrees: (row.degrees as { degree: string; year: string }[]) ?? [] };
+  }
   return {
     ...base,
     reached: reachedStage(events.map((e) => e.status)),
@@ -99,11 +114,15 @@ export async function getApplication(id: string): Promise<ApplicationDetail | nu
     events,
     undoable: isUndoable(base.status, base.createdAt),
     candidate: candidate ? { fullName: candidate.full_name, headline: candidate.headline, location: candidate.location } : null,
+    anonymous: data.anonymous,
+    blind,
+    blindView,
   };
 }
 
 export interface AdminApplicationRow extends ApplicationSummary {
   candidateName: string;
+  anonymous: boolean;
 }
 
 export const ADMIN_PAGE_SIZE = 20;
@@ -114,7 +133,7 @@ export async function listAllApplications(opts: { status?: ApplicationStatus; pa
   const run = (page: number) => {
     let q = supabase
       .from("applications")
-      .select(`id, status, created_at, updated_at, candidate_id, ${JOB}, application_events(status), profiles(full_name)`, { count: "exact" })
+      .select(`id, status, created_at, updated_at, candidate_id, anonymous, ${JOB}, application_events(status), profiles(full_name)`, { count: "exact" })
       .order("updated_at", { ascending: false })
       .range((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE - 1);
     if (opts.status) q = q.eq("status", opts.status);
@@ -137,7 +156,8 @@ export async function listAllApplications(opts: { status?: ApplicationStatus; pa
     .map((r) => {
       const s = summary(r as never);
       const p = one((r as unknown as { profiles: { full_name: string } | { full_name: string }[] | null }).profiles);
-      return s ? { ...s, candidateName: p?.full_name || "Unnamed candidate" } : null;
+      const anonymous = (r as unknown as { anonymous: boolean }).anonymous;
+      return s ? { ...s, anonymous, candidateName: p?.full_name || (anonymous ? pseudonym(s.id) : "Unnamed candidate") } : null;
     })
     .filter((r): r is AdminApplicationRow => r !== null);
 
