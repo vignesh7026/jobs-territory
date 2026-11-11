@@ -1,12 +1,13 @@
 import { MapPin, Search } from "lucide-react";
+import { ProductDemo } from "@/components/home/product-demo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Home. Left-aligned headline, one supporting line, the search bar. The 3D hero is added in a later commit.
+// Home. Left-aligned headline, one supporting line, the search bar, and a miniature of the product that plays once.
 export default function HomePage() {
   return (
-    <section className="container py-12 md:py-20">
+    <section className="container grid items-center gap-12 py-12 md:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
       <div className="max-w-2xl">
         <h1 className="text-3xl md:text-4xl">Find a role, see how you match, and track every application.</h1>
         <p className="mt-4 max-w-prose text-base text-muted">
@@ -34,6 +35,7 @@ export default function HomePage() {
           </Button>
         </form>
       </div>
+      <ProductDemo />
     </section>
   );
 }
