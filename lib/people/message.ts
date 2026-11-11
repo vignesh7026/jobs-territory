@@ -35,7 +35,7 @@ export function draftFirstMessage(i: DraftInput): string {
     i.contactKind === "recruiter"
       ? "Is the role still open, and is there anything I should add to my application before it is reviewed?"
       : "I would value ten minutes of your view on what the team needs most from this hire.";
-  return [greeting, "", intro, why, ask, "", "Thank you for your time.", i.candidateFirstName].join("\n");
+  return [greeting, "", `${intro} ${why}`, "", ask, "", "Thank you for your time.", i.candidateFirstName].join("\n");
 }
 
 function lowerFirst(s: string): string {

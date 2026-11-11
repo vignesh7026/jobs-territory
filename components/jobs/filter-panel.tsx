@@ -22,7 +22,7 @@ function Group<T extends string>({ legend, options, labels, selected, onToggle }
 
 const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
-export function FilterPanel() {
+export function FilterPanel({ signedIn }: { signedIn: boolean }) {
   const { filters, push } = useSearch();
   const [open, setOpen] = useState(false);
   const count = activeChips({ ...filters, q: "", location: "" }).length;
@@ -44,6 +44,16 @@ export function FilterPanel() {
       </button>
 
       <div id="filter-groups" className={cn("mt-3 grid gap-5 lg:mt-0 lg:block lg:space-y-6", open ? "grid" : "hidden lg:block")}>
+        <fieldset className="grid gap-0.5">
+          <legend className="mb-1 text-sm font-medium">Effort</legend>
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md px-2 py-2 text-sm hover:bg-primary-soft md:min-h-9">
+            <input type="checkbox" checked={filters.quick} onChange={() => push(withFilters(filters, { quick: !filters.quick }))} className="mt-0.5 size-4 accent-[var(--primary)]" />
+            <span>
+              Quick apply
+              <span className="block text-xs text-muted">{signedIn ? "Jobs you match at 60% or more, apply in one tap" : "Sign in to use this"}</span>
+            </span>
+          </label>
+        </fieldset>
         <Group legend="Job type" options={JOB_TYPES} labels={TYPE_LABELS} selected={filters.types} onToggle={(v) => push(withFilters(filters, { types: toggle(filters.types, v) }))} />
         <Group legend="Work mode" options={WORK_MODES} labels={MODE_LABELS} selected={filters.modes} onToggle={(v) => push(withFilters(filters, { modes: toggle(filters.modes, v) }))} />
         <Group legend="Experience level" options={JOB_LEVELS} labels={LEVEL_LABELS} selected={filters.levels} onToggle={(v) => push(withFilters(filters, { levels: toggle(filters.levels, v) }))} />

@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowLeftRight, Building2, Clock, Laptop, MapPin } from "lucide-react";
+import { ArrowLeftRight, Building2, Clock, Laptop, MapPin, TriangleAlert } from "lucide-react";
 import { CompareToggle } from "@/components/compare/compare-toggle";
 import { SaveButton } from "@/components/saved/save-button";
 import { useRouter } from "next/navigation";
+import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { Tilt } from "@/components/jobs/tilt";
 import { MORPH_JOB_ATTR, VT_NAMES, morphToJob } from "@/lib/morph";
 import { Badge } from "@/components/ui/badge";
+import { GHOST_LABEL, ghostCheck } from "@/lib/ghost";
 import { t } from "@/lib/motion";
 import { LEVEL_LABELS, MODE_LABELS, TYPE_LABELS, type WorkMode } from "@/lib/jobs/filters";
 import { daysUntil, formatSalary, timeAgo } from "@/lib/format";
@@ -28,10 +30,11 @@ export function CompanyMark({ name, className = "size-11", ...rest }: { name: st
  * One result. A dense row, not a card: the list is meant to be scanned.
  * The first eight rows fade in with a 40 ms stagger; later ones appear immediately.
  */
-export function JobRow({ job, index, match, saved, signedIn }: { job: JobListItem; index: number; match?: number; saved?: boolean; signedIn?: boolean }) {
+export function JobRow({ job, index, match, saved, signedIn, quick }: { job: JobListItem; index: number; match?: number; saved?: boolean; signedIn?: boolean; quick?: boolean }) {
   const reduce = useReducedMotion();
   const router = useRouter();
   const closing = daysUntil(job.closesAt);
+  const ghost = ghostCheck(job);
   // Coming back from this job's page: name this row so the page's logo and title morph into it.
   const morphBack = typeof document !== "undefined" && document.documentElement.getAttribute(MORPH_JOB_ATTR) === job.id;
 
@@ -70,6 +73,11 @@ export function JobRow({ job, index, match, saved, signedIn }: { job: JobListIte
             </Badge>
             <Badge>{TYPE_LABELS[job.jobType]}</Badge>
             <Badge>{LEVEL_LABELS[job.level]}</Badge>
+            {ghost.level !== "none" && (
+              <Badge variant="warning" title={ghost.reasons.join(" ")}>
+                <TriangleAlert /> {GHOST_LABEL[ghost.level]}
+              </Badge>
+            )}
             {closing !== null && closing <= 7 && (
               <Badge variant="warning">
                 <Clock /> {closing === 0 ? "Closes today" : `Closes in ${closing} ${closing === 1 ? "day" : "days"}`}
@@ -89,6 +97,11 @@ export function JobRow({ job, index, match, saved, signedIn }: { job: JobListIte
         </div>
       </Link>
       </Tilt>
+      {quick && (
+        <div className="mt-2 flex justify-end">
+          <QuickApplyButton jobId={job.id} jobTitle={job.title} company={job.company.name} />
+        </div>
+      )}
       {/* Outside the link on purpose: interactive controls cannot live inside an anchor. */}
       <div className="absolute right-2 top-2 flex">
         <CompareToggle item={{ id: job.id, title: job.title, company: job.company.name }} />

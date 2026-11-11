@@ -1,6 +1,6 @@
 // Generates supabase/seed.sql from supabase/seed-data.mjs.   npm run seed:gen
 import { writeFileSync } from "node:fs";
-import { backgrounds, companies, contacts, jobs, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
+import { backgrounds, companies, contacts, jobs, staleListings, vagueListing, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
 
 const q = (s) => (s == null ? "null" : `'${String(s).replace(/'/g, "''")}'`);
 const arr = (a) => `array[${a.map(q).join(", ")}]::text[]`;
@@ -32,6 +32,11 @@ sql.push(
     )
     .join(",\n") + ";\n",
 );
+
+// Stale and vague listings for the ghost-job check. Everything else keeps first_posted_at = null (same as posted_at).
+for (const [slug, days, reposts] of staleListings) sql.push(`update public.jobs set first_posted_at = now() - interval '${days} days', repost_count = ${reposts} where slug = ${q(slug)};`);
+sql.push(`update public.jobs set summary = ${q(vagueListing.summary)}, responsibilities = ${arr(vagueListing.responsibilities)}, requirements = ${arr(vagueListing.requirements)}, skills = '{}' where slug = ${q(vagueListing.slug)};
+`);
 
 // Demo auth users (password is bcrypt-hashed by the database). Token columns must be '' not null for GoTrue.
 for (const u of Object.values(demo)) {

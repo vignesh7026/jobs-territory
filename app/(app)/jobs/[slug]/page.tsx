@@ -8,6 +8,7 @@ import { plainSummary } from "@/lib/ai/features";
 import { GapCard, MatchCard, MatchSignIn } from "@/components/match/match-card";
 import { CompanyMark } from "@/components/jobs/job-row";
 import { BackLink } from "@/components/jobs/back-link";
+import { GhostCard } from "@/components/jobs/ghost-card";
 import { ReachOut } from "@/components/jobs/reach-out";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -165,6 +166,7 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
           ) : (
             <MatchSignIn href={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
           )}
+          <GhostCard job={{ firstPostedAt: job.firstPostedAt, postedAt: job.postedAt, repostCount: job.repostCount, isVague: job.isVague }} />
           <ReachOut contacts={contacts} jobTitle={job.title} company={c.name} signInHref={user ? null : `/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
           <Card className="p-5">
             <h2 className="text-base">About {c.name}</h2>

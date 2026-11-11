@@ -4,7 +4,7 @@ import { daysUntil, formatSalary, timeAgo } from "@/lib/format";
 
 describe("parseFilters", () => {
   it("returns clean defaults for an empty URL", () => {
-    expect(parseFilters({})).toEqual({ q: "", location: "", types: [], modes: [], levels: [], sort: "newest", page: 1 });
+    expect(parseFilters({})).toEqual({ q: "", location: "", types: [], modes: [], levels: [], quick: false, sort: "newest", page: 1 });
   });
 
   it("reads comma-separated and repeated values, keeps canonical order and drops unknown ones", () => {
@@ -131,4 +131,13 @@ describe("pageWindow", () => {
   it("collapses distant pages into gaps", () => expect(pageWindow(6, 20)).toEqual([1, "gap", 5, 6, 7, "gap", 20]));
   it("has no gap next to the ends", () => expect(pageWindow(2, 20)).toEqual([1, 2, 3, "gap", 20]));
   it("handles a single page", () => expect(pageWindow(1, 1)).toEqual([1]));
+
+  it("quick apply round-trips through the URL and shows as a removable chip", () => {
+    const f = parseFilters({ quick: "1" });
+    expect(f.quick).toBe(true);
+    expect(toSearchParams(f).get("quick")).toBe("1");
+    expect(activeChips(f).map((c) => c.label)).toEqual(["Quick apply"]);
+    expect(activeChips(f)[0].without.quick).toBe(false);
+    expect(toSearchParams(parseFilters({})).has("quick")).toBe(false);
+  });
 });

@@ -291,3 +291,17 @@ export const backgrounds = {
   'basil-commerce': ['founded and sold a small online grocery business', 'runs hiring for commerce and logistics teams'],
   'vantage-retail': ['ran store operations for a national retail chain', 'has managed retail technology and analytics hiring for nine years'],
 };
+
+// Listings with signs of being stale or empty, so the ghost-job check has something real to show.
+// [slug, days since first posted, times reposted]
+export const staleListings = [
+  ['developer-advocate', 96, 3],
+  ['qa-automation-engineer', 58, 1],
+];
+// A deliberately vague listing: little text, no skills.
+export const vagueListing = {
+  slug: 'catalogue-operations-executive',
+  summary: 'We are hiring a talented person to join our growing team.',
+  responsibilities: ['Various duties as assigned'],
+  requirements: ['Good attitude'],
+};
