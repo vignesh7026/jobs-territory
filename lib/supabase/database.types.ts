@@ -163,6 +163,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"roadmap_items": {
+                  Row: {
+                    "candidate_id": string,"created_at": string,"done": boolean,"id": string,"resource_title": string,"resource_url": string,"skill": string,"target": string,"task": string,"week": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "candidate_id"?: string,"created_at"?: string,"done"?: boolean,"id"?: string,"resource_title": string,"resource_url": string,"skill": string,"target": string,"task": string,"week": number
+                  }
+                  Update: {
+                    "candidate_id"?: string,"created_at"?: string,"done"?: boolean,"id"?: string,"resource_title"?: string,"resource_url"?: string,"skill"?: string,"target"?: string,"task"?: string,"week"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "roadmap_items_candidate_id_fkey"
+      columns: ["candidate_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"saved_jobs": {
                   Row: {
                     "candidate_id": string,"created_at": string,"job_id": string

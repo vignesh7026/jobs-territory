@@ -39,6 +39,7 @@ export const schemas = {
   negotiate: z.object({ subject: z.string().trim().min(4).max(110), body: z.string().trim().min(80).max(1400) }),
   interviewQuestions: z.object({ questions: z.array(z.object({ kind: z.enum(["intro", "behavioral", "skill"]), text: z.string().trim().min(15).max(240) })).length(5) }),
   interviewScore: z.object({ clarity: z.number().int().min(1).max(5), structure: z.number().int().min(1).max(5), specificity: z.number().int().min(1).max(5), feedback: z.string().trim().min(20).max(420), tip: z.string().trim().min(10).max(260) }),
+  roadmap: z.object({ weeks: z.array(z.object({ week: z.number().int().min(1).max(8), skill: z.string().trim().min(1).max(60), tasks: z.array(z.string().trim().min(10).max(170)).min(2).max(3) })).min(2).max(8) }),
   voiceProfile: z.object({ headline: z.string().trim().max(160), summary: z.string().trim().min(20).max(900), skills: z.array(z.string().trim().min(1).max(40)).max(12) }),
 };
 export type MatchAi = z.infer<typeof schemas.match>;
@@ -102,6 +103,12 @@ ${data({ job: jobPayload(job) })}`,
     user: `Score a candidate's spoken or typed interview answer. Give integer scores 1 to 5 for: clarity (easy to follow, right length, no rambling), structure (for behavioral questions: situation, task, action, result; for skill questions: steps in a sensible order with reasons), specificity (concrete numbers, tools, examples). Be honest: a vague or very short answer scores 1 or 2. Then "feedback": exactly two sentences, the first on what worked, the second on the biggest gap. Then "tip": one concrete thing to do on the next attempt. Judge how the answer is delivered, not whether the candidate's claims are true; do not invent facts about them.
 Shape: {"clarity":1,"structure":1,"specificity":1,"feedback":"...","tip":"..."}
 ${data({ role: a.job.title, question: a.question, questionKind: a.kind, answer: trim(a.answer, 3000), secondsUsed: a.seconds, secondsAllowed: a.limit })}`,
+  }),
+  roadmap: (a: { job: AiJob; have: string[]; missing: string[]; weeks: number }) => ({
+    maxTokens: 1100,
+    user: `Make a ${a.weeks}-week learning plan to get a candidate ready to apply for this job. One entry per week, as the "weeks" array, week numbers 1 to ${a.weeks}. Each entry has the "skill" it focuses on (use the missing skills, most important first; once they are covered use "Portfolio" or "Interviews") and 2 or 3 short, concrete "tasks" the candidate can do that week (build something small, read a specific part, write something down). Do not include links or URLs. Do not claim the candidate already has a missing skill. Keep each task under 160 characters.
+Shape: {"weeks":[{"week":1,"skill":"...","tasks":["...","..."]}]}
+${data({ job: jobPayload(a.job), skillsTheyHave: a.have.slice(0, 20), skillsTheyMiss: a.missing.slice(0, 8) })}`,
   }),
   voiceProfile: (transcript: string) => ({
     maxTokens: 700,

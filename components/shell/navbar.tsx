@@ -16,6 +16,7 @@ const memberLinks = [
   { href: "/applications", label: "Applications" },
   { href: "/saved", label: "Saved" },
   { href: "/practice", label: "Practice" },
+  { href: "/career", label: "Career" },
 ];
 
 export function Navbar({ user }: { user: MenuUser | null }) {

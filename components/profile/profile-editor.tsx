@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { saveProfile } from "@/app/(app)/profile/actions";
@@ -41,7 +42,7 @@ function Section({ id, title, description, children }: { id: string; title: stri
   );
 }
 
-export function ProfileEditor({ initial, initialResume, email }: { initial: ProfileValues; initialResume: ResumeState | null; email: string }) {
+export function ProfileEditor({ initial, initialResume, email, plan }: { initial: ProfileValues; initialResume: ResumeState | null; email: string; plan: { target: string; done: number; total: number; percent: number } | null }) {
   const router = useRouter();
   const { toast } = useToast();
   const [values, setValues] = useState<ProfileValues>(initial);
@@ -110,6 +111,17 @@ export function ProfileEditor({ initial, initialResume, email }: { initial: Prof
       <aside className="grid gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
         <StrengthMeter score={strength.score} next={strength.next} />
         <ResumeCard resume={resume} onChange={setResume} />
+        {plan && (
+          <Card className="p-5" data-testid="plan-card">
+            <h2 className="text-base">Learning plan</h2>
+            <p className="mt-1 text-sm text-muted">{plan.target}</p>
+            <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-border" aria-hidden="true">
+              <span className="block h-full origin-left rounded-full bg-primary" style={{ transform: `scaleX(${plan.percent / 100})` }} />
+            </span>
+            <p className="mt-2 text-sm tabular-nums">{plan.done} of {plan.total} tasks done</p>
+            <Link href="/career#plan" className="mt-2 inline-flex min-h-9 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">Open the plan</Link>
+          </Card>
+        )}
         <VoiceBuilder
           onApply={(pick) => {
             setValues((v) => ({ ...v, headline: pick.headline ?? v.headline, summary: pick.summary ?? v.summary, skills: mergeSkills(v.skills, pick.skills) }));

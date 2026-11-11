@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ProfileEditor, type ProfileValues } from "@/components/profile/profile-editor";
 import { requireUser } from "@/lib/auth/session";
+import { getRoadmap } from "@/lib/career-queries";
+import { progress } from "@/lib/roadmap";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Profile" };
@@ -12,6 +14,7 @@ export default async function ProfilePage() {
   const user = await requireUser("/profile");
   const supabase = await createClient();
   const { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  const plan = await getRoadmap(user.id);
 
   const initial: ProfileValues = {
     fullName: p?.full_name ?? user.fullName,
@@ -30,7 +33,7 @@ export default async function ProfilePage() {
     <section className="container py-8 md:py-10">
       <h1 className="text-3xl">Profile</h1>
       <p className="mb-6 mt-2 max-w-prose text-muted">Employers see this when you apply. Keep your skills accurate: every match score is built from them.</p>
-      <ProfileEditor initial={initial} initialResume={resumeName ? { name: resumeName } : null} email={user.email} />
+      <ProfileEditor initial={initial} initialResume={resumeName ? { name: resumeName } : null} email={user.email} plan={plan.length ? { target: plan[0].target, ...progress(plan) } : null} />
     </section>
   );
 }

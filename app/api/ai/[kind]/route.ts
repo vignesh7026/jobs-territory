@@ -9,6 +9,7 @@ import { applicationHealth } from "@/lib/applications/health";
 import { getApplication } from "@/lib/applications/queries";
 import { getCurrentUser } from "@/lib/auth/session";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
+import { plainRoadmap } from "@/lib/roadmap";
 import { SECONDS_PER_ANSWER, plainQuestions, plainScore } from "@/lib/interview";
 import { describeRange, plainNegotiation } from "@/lib/negotiate";
 import { getMarketSample } from "@/lib/negotiate-queries";
@@ -20,12 +21,13 @@ import { groundSkills, plainVoiceDraft } from "@/lib/voice-profile";
  * "ai", "cache" or "fallback"; if the model is down the plain, non-AI result comes back instead of an error.
  * 401 signed out, 404 unknown job/application, 422 not applicable, 429 too many requests.
  */
-const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate", "voice-profile", "interview-questions", "interview-score"] as const;
+const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate", "voice-profile", "interview-questions", "interview-score", "roadmap"] as const;
 type Kind = (typeof KINDS)[number];
 
 const jobBody = z.object({ jobId: z.string().refine(isUuid, "Invalid job id") });
 const appBody = z.object({ applicationId: z.string().refine(isUuid, "Invalid application id") });
 const scoreBody = jobBody.extend({ question: z.string().trim().min(5).max(300), kind: z.enum(["intro", "behavioral", "skill"]), answer: z.string().trim().min(1).max(3000), seconds: z.number().int().min(0).max(900) });
+const roadmapBody = z.object({ weeks: z.number().int().min(2).max(8) });
 const voiceBody = z.object({ transcript: z.string().trim().min(40).max(4000) });
 const negotiateBody = appBody.extend({ offer: z.string().trim().max(40).optional() });
 const reply = (data: unknown, source: string) => NextResponse.json({ data, source }, { headers: { "Cache-Control": "private, no-store" } });
@@ -129,6 +131,14 @@ export async function POST(request: Request, ctx: RouteContext<"/api/ai/[kind]">
       if (kind === "match") {
         const p = prompts.match(job.ai, match);
         const r = await ai({ kind: "match", jobId: job.id, profileVersion: profile.version, schema: schemas.match, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: { lines: fallbackExplanation(match, job.ai.skills.length) } });
+        return reply(r.data, r.source);
+      }
+      if (kind === "roadmap") {
+        const weeks = roadmapBody.safeParse(body);
+        const n = weeks.success ? weeks.data.weeks : 6;
+        const input = { job: job.ai, have: match.matched, missing: match.missing, weeks: n };
+        const p = prompts.roadmap(input);
+        const r = await ai({ kind: "roadmap", jobId: job.id, profileVersion: profile.version, inputKey: String(n), schema: schemas.roadmap, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: { weeks: plainRoadmap(match.missing, n) } });
         return reply(r.data, r.source);
       }
       if (kind === "gap") {

@@ -149,5 +149,21 @@ select pg_temp.check_that((select applications from public.company_response('tam
 select pg_temp.expect_error($$update public.company_contacts set email = 'x@y.z'$$, '42501', 'candidate cannot edit contacts');
 select pg_temp.reset();
 
+-- roadmap: private to its owner ---------------------------------------
+select pg_temp.act_as('11111111-1111-4111-8111-111111111111');
+insert into public.roadmap_items (target, week, skill, task, resource_title, resource_url) values ('Test role', 1, 'SQL', 'Do the thing', 'Guide', 'https://example.com/guide');
+select pg_temp.check_that((select count(*) from public.roadmap_items) = 1, 'owner sees their own roadmap item');
+update public.roadmap_items set done = true;
+select pg_temp.check_that((select done from public.roadmap_items) = true, 'owner can tick a task');
+select pg_temp.expect_error($$update public.roadmap_items set task = 'changed'$$, '42501', 'only done is updatable, not the task text');
+select pg_temp.expect_error($$insert into public.roadmap_items (target, week, skill, task, resource_title, resource_url) values ('x', 1, 'x', 'x', 'x', 'http://not-https')$$, '23514', 'links must be https');
+select pg_temp.reset();
+select pg_temp.act_as('33333333-3333-4333-8333-333333333333');
+select pg_temp.check_that((select count(*) from public.roadmap_items) = 0, 'another candidate cannot see it');
+select pg_temp.reset();
+select pg_temp.act_as(null, 'anon');
+select pg_temp.expect_error('select * from public.roadmap_items', '42501', 'anon cannot read roadmaps');
+select pg_temp.reset();
+
 rollback;
 \echo ALL SECURITY CHECKS PASSED
