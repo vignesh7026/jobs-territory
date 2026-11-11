@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:gen": "node scripts/gen-seed.mjs",
+    "db:start": "supabase start -x studio,imgproxy,edge-runtime,logflare,vector,postgres-meta,supavisor",
+    "db:stop": "supabase stop",
+    "db:reset": "npm run seed:gen && supabase db reset",
+    "db:test": "node scripts/db-test.mjs",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.17",
@@ -31,6 +37,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "supabase": "^3.1.0",
     "typescript": "^5"
   }
 }
