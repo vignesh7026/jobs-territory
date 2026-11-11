@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ai } from "@/lib/ai";
@@ -10,6 +11,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
 import { describeRange, plainNegotiation } from "@/lib/negotiate";
 import { getMarketSample } from "@/lib/negotiate-queries";
+import { groundSkills, plainVoiceDraft } from "@/lib/voice-profile";
 
 /**
  * POST /api/ai/:kind   kind = match | gap | summary | cover-letter | follow-up
@@ -17,11 +19,12 @@ import { getMarketSample } from "@/lib/negotiate-queries";
  * "ai", "cache" or "fallback"; if the model is down the plain, non-AI result comes back instead of an error.
  * 401 signed out, 404 unknown job/application, 422 not applicable, 429 too many requests.
  */
-const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate"] as const;
+const KINDS = ["match", "gap", "summary", "cover-letter", "follow-up", "negotiate", "voice-profile"] as const;
 type Kind = (typeof KINDS)[number];
 
 const jobBody = z.object({ jobId: z.string().refine(isUuid, "Invalid job id") });
 const appBody = z.object({ applicationId: z.string().refine(isUuid, "Invalid application id") });
+const voiceBody = z.object({ transcript: z.string().trim().min(40).max(4000) });
 const negotiateBody = appBody.extend({ offer: z.string().trim().max(40).optional() });
 const reply = (data: unknown, source: string) => NextResponse.json({ data, source }, { headers: { "Cache-Control": "private, no-store" } });
 const err = (message: string, status: number) => NextResponse.json({ error: message }, { status });
@@ -56,6 +59,16 @@ export async function POST(request: Request, ctx: RouteContext<"/api/ai/[kind]">
       const p = prompts.followUp(input);
       const r = await ai({ kind: "follow-up", jobId: job.id, inputKey: `${app.id}:${app.status}:${app.updatedAt.slice(0, 10)}`, schema: schemas.followUp, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: plainFollowUp(input) });
       return reply(r.data, r.source);
+    }
+
+    case "voice-profile": {
+      const parsed = voiceBody.safeParse(body);
+      if (!parsed.success) return err("Say or type a little more about yourself (at least a couple of sentences).", 400);
+      const transcript = parsed.data.transcript;
+      const p = prompts.voiceProfile(transcript);
+      const r = await ai({ kind: "voice-profile", inputKey: `${user.id}:${createHash("sha256").update(transcript).digest("hex")}`, schema: schemas.voiceProfile, system: SYSTEM, user: p.user, maxTokens: p.maxTokens, fallback: plainVoiceDraft(transcript) });
+      // Whatever the model returned, only skills the person actually named are kept.
+      return reply({ ...r.data, skills: groundSkills(r.data.skills, transcript) }, r.source);
     }
 
     case "negotiate": {

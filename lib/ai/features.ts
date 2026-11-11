@@ -37,6 +37,7 @@ export const schemas = {
   coverLetter: z.object({ text: z.string().trim().min(200).max(2600) }),
   followUp: z.object({ subject: z.string().trim().min(4).max(110), body: z.string().trim().min(80).max(1400) }),
   negotiate: z.object({ subject: z.string().trim().min(4).max(110), body: z.string().trim().min(80).max(1400) }),
+  voiceProfile: z.object({ headline: z.string().trim().max(160), summary: z.string().trim().min(20).max(900), skills: z.array(z.string().trim().min(1).max(40)).max(12) }),
 };
 export type MatchAi = z.infer<typeof schemas.match>;
 export type GapAi = z.infer<typeof schemas.gap>;
@@ -87,6 +88,10 @@ export const prompts = {
   followUp: (a: { job: AiJob; status: ApplicationStatus; appliedOn: string; daysSinceUpdate: number; firstName: string }) => ({
     maxTokens: 700,
     user: `Write a polite follow-up email from a candidate who applied ${a.daysSinceUpdate >= 14 ? "a while ago" : "recently"} and has not heard back. 80 to 140 words. Mention the role and the application date, restate interest in one sentence, ask whether there is any update or anything else needed. Do not pressure or complain. Sign off with the first name.\nShape: {"subject":"...","body":"..."}\n${data({ job: { title: a.job.title, company: a.job.company }, status: STATUS_LABELS[a.status], appliedOn: a.appliedOn, daysSinceLastUpdate: a.daysSinceUpdate, firstName: a.firstName })}`,
+  }),
+  voiceProfile: (transcript: string) => ({
+    maxTokens: 700,
+    user: `A candidate spoke about themselves for about a minute; the transcript is below (it may contain filler words and speech-recognition mistakes). Turn it into profile fields: "headline" (one line under 120 characters: what they do and their level or focus), "summary" (3 to 5 plain sentences in the first person, no hype), and "skills" (up to 12 skills they actually named, short names like "React" or "SQL"). Use ONLY what they said. Do not add skills, employers, numbers, years or achievements they did not mention. Fix obvious speech-recognition errors only where the meaning is certain.\nShape: {"headline":"...","summary":"...","skills":["..."]}\n${data({ transcript: trim(transcript, 4000) })}`,
   }),
   negotiate: (a: { job: { title: string; company: string }; firstName: string; offer: string; range: string | null }) => ({
     maxTokens: 700,

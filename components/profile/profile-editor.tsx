@@ -8,6 +8,7 @@ import { EducationList, ExperienceList, type EducationValue, type ExperienceValu
 import { ResumeCard, type ResumeState } from "@/components/profile/resume-card";
 import { SkillInput } from "@/components/profile/skill-input";
 import { StrengthMeter } from "@/components/profile/strength-meter";
+import { VoiceBuilder } from "@/components/profile/voice-builder";
 import { useToast } from "@/components/shell/toaster";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { profileStrength } from "@/lib/profile-strength";
+import { mergeSkills } from "@/lib/voice-profile";
 import { profileSchema } from "@/lib/validation/profile";
 import { pathErrors } from "@/lib/validation/shared";
 
@@ -108,6 +110,12 @@ export function ProfileEditor({ initial, initialResume, email }: { initial: Prof
       <aside className="grid gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
         <StrengthMeter score={strength.score} next={strength.next} />
         <ResumeCard resume={resume} onChange={setResume} />
+        <VoiceBuilder
+          onApply={(pick) => {
+            setValues((v) => ({ ...v, headline: pick.headline ?? v.headline, summary: pick.summary ?? v.summary, skills: mergeSkills(v.skills, pick.skills) }));
+            toast({ title: "Added to your profile", description: "Review it, then press Save changes." });
+          }}
+        />
       </aside>
 
       <form onSubmit={onSave} noValidate className="grid gap-6 lg:col-start-1 lg:row-start-1">
