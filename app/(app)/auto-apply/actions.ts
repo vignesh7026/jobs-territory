@@ -37,7 +37,7 @@ export async function saveRule(input: unknown): Promise<RuleResult> {
   const { error } = await supabase.from("auto_apply_rules").upsert(
     {
       candidate_id: user.id, roles: v.roles, locations: v.locations, include_remote: v.includeRemote, min_match: v.minMatch,
-      daily_cap: v.dailyCap, verified_only: v.verifiedOnly, enabled: true, last_run_at: null, updated_at: new Date().toISOString(),
+      daily_cap: v.dailyCap, verified_only: v.verifiedOnly, include_note: v.includeNote, enabled: true, last_run_at: null, updated_at: new Date().toISOString(),
     },
     { onConflict: "candidate_id" },
   );

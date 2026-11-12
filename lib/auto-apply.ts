@@ -32,6 +32,7 @@ export const ruleSchema = z
     minMatch: z.number().int().min(40).max(100),
     dailyCap: z.number().int().min(1).max(10),
     verifiedOnly: z.boolean(),
+    includeNote: z.boolean().default(false),
     consent: z.literal(true, { error: "Tick the box to confirm you want applications sent for you." }),
   })
   .refine((v) => v.locations.length > 0 || v.includeRemote, { message: "Choose a location, or allow remote jobs.", path: ["locations"] });
@@ -44,6 +45,7 @@ export interface Rule {
   minMatch: number;
   dailyCap: number;
   verifiedOnly: boolean;
+  includeNote?: boolean;
 }
 
 export interface Candidate {

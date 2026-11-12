@@ -2,12 +2,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import type { MatchProfile } from "@/lib/match";
 import { quickApplyReadiness } from "@/lib/quick-apply";
+import { buildAutoNote } from "@/lib/auto-note";
 import { dueForSweep, pickJobs, remainingToday, type Candidate, type JobPick, type Rule } from "@/lib/auto-apply";
 
 // Takes a client so the integration tests can run it against the real database as a signed-in candidate.
 type Db = SupabaseClient<Database>;
 
 export interface StoredRule extends Rule {
+  includeNote: boolean;
   enabled: boolean;
   lastRunAt: string | null;
 }
@@ -17,7 +19,7 @@ export async function getRule(db: Db, userId: string): Promise<StoredRule | null
   if (!data) return null;
   return {
     roles: data.roles, locations: data.locations, includeRemote: data.include_remote, minMatch: data.min_match,
-    dailyCap: data.daily_cap, verifiedOnly: data.verified_only, enabled: data.enabled, lastRunAt: data.last_run_at,
+    dailyCap: data.daily_cap, verifiedOnly: data.verified_only, includeNote: data.include_note, enabled: data.enabled, lastRunAt: data.last_run_at,
   };
 }
 
@@ -74,7 +76,7 @@ export interface RunResult {
  * Apply for the candidate under their rule. Safe to call often: it stops when the rule is off, the profile is not
  * ready, the daily cap is used, or (unless forced) it ran less than 30 minutes ago. A duplicate (409) is skipped.
  */
-export async function runAutoApply(db: Db, userId: string, profile: MatchProfile, opts: { force?: boolean } = {}): Promise<RunResult> {
+export async function runAutoApply(db: Db, userId: string, profile: MatchProfile, opts: { force?: boolean; /** true when called with the service-role client (the scheduler): the row must then name its candidate */ service?: boolean } = {}): Promise<RunResult> {
   const rule = await getRule(db, userId);
   if (!rule) return { ran: false, reason: "No rule saved.", applied: [] };
   if (!rule.enabled) return { ran: false, reason: "Auto-apply is paused.", applied: [] };
@@ -87,9 +89,16 @@ export async function runAutoApply(db: Db, userId: string, profile: MatchProfile
 
   const [jobs, applied, sent] = await Promise.all([loadCandidates(db), appliedIds(db, userId), sentLast24h(db, userId)]);
   const picks = pickJobs(rule, profile, jobs, applied, remainingToday(rule.dailyCap, sent));
+  let firstName = "";
+  if (rule.includeNote && picks.length > 0) {
+    const { data: me } = await db.from("profiles").select("full_name").eq("id", userId).maybeSingle();
+    firstName = (me?.full_name ?? "").trim().split(/\s+/)[0] ?? "";
+  }
   const done: RunResult["applied"] = [];
   for (const p of picks) {
-    const { data, error } = await db.from("applications").insert({ job_id: p.job.id, auto_applied: true }).select("id").single();
+    const note = rule.includeNote ? buildAutoNote({ firstName, title: p.job.title, company: p.job.company, profileSkills: profile.skills, jobSkills: p.job.skills, score: p.score }) : null;
+    const row: Database["public"]["Tables"]["applications"]["Insert"] = { job_id: p.job.id, auto_applied: true, cover_note: note, ...(opts.service ? { candidate_id: userId } : {}) };
+    const { data, error } = await db.from("applications").insert(row).select("id").single();
     if (error || !data) continue; // 23505 already applied, 42501 closed in the meantime: skip, never retry
     done.push({ applicationId: data.id, jobId: p.job.id, title: p.job.title, company: p.job.company, score: p.score });
   }

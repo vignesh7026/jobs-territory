@@ -93,3 +93,39 @@ describe("auto-apply rules", () => {
     expect(again.ran).toBe(false);
   });
 });
+
+describe("scheduled run (service client)", () => {
+  it("applies for the named candidate under their own limits, without a session", async () => {
+    const service = createClient<Database>(url, process.env.SUPABASE_SERVICE_ROLE_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU", { auth: { persistSession: false } });
+    const a = await newCandidate();
+    await a.db.from("auto_apply_rules").insert(baseRule(a.id, { daily_cap: 1 }));
+    const run = await runAutoApply(service, a.id, profile, { force: true, service: true });
+    expect(run.ran).toBe(true);
+    expect(run.applied.length).toBe(1);
+    const { data } = await a.db.from("applications").select("candidate_id, auto_applied").eq("candidate_id", a.id);
+    expect(data).toHaveLength(1);
+    expect(data![0].auto_applied).toBe(true);
+  });
+});
+
+describe("auto-apply cover note", () => {
+  it("is attached only when the rule asks for it, and names only real shared skills", async () => {
+    const withNote = await newCandidate();
+    await withNote.db.from("auto_apply_rules").insert(baseRule(withNote.id, { include_note: true, daily_cap: 2 }));
+    await withNote.db.from("profiles").update({ full_name: "Meera Krishnan" }).eq("id", withNote.id);
+    const a = await runAutoApply(withNote.db, withNote.id, profile, { force: true });
+    expect(a.applied.length).toBeGreaterThan(0);
+    const { data } = await withNote.db.from("applications").select("cover_note, jobs(skills)").eq("candidate_id", withNote.id);
+    for (const r of data ?? []) {
+      expect(r.cover_note).toContain("Meera");
+      expect(r.cover_note).toContain("Regards,");
+    }
+
+    const without = await newCandidate();
+    await without.db.from("auto_apply_rules").insert(baseRule(without.id, { include_note: false }));
+    await runAutoApply(without.db, without.id, profile, { force: true });
+    const { data: none } = await without.db.from("applications").select("cover_note").eq("candidate_id", without.id);
+    expect(none!.length).toBeGreaterThan(0);
+    expect(none!.every((r) => r.cover_note === null)).toBe(true);
+  });
+});

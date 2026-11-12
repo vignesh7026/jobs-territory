@@ -14,7 +14,7 @@ import { DAILY_CAP_CHOICES, MIN_MATCH_CHOICES, parseTerms } from "@/lib/auto-app
 const select = "h-11 rounded-md border border-border bg-surface px-2 text-sm md:h-10";
 
 export interface PanelRule {
-  roles: string[]; locations: string[]; includeRemote: boolean; minMatch: number; dailyCap: number; verifiedOnly: boolean; enabled: boolean;
+  roles: string[]; locations: string[]; includeRemote: boolean; minMatch: number; dailyCap: number; verifiedOnly: boolean; includeNote: boolean; enabled: boolean;
 }
 export interface PanelPick { slug: string; title: string; company: string; location: string; score: number }
 export interface PanelSent { id: string; slug: string; title: string; company: string; when: string; canUndo: boolean }
@@ -33,6 +33,7 @@ export function AutoApplyPanel({ rule, notReady, picks, remainingToday, sent }: 
   const [minMatch, setMinMatch] = useState(rule?.minMatch ?? 60);
   const [dailyCap, setDailyCap] = useState(rule?.dailyCap ?? 3);
   const [verifiedOnly, setVerifiedOnly] = useState(rule?.verifiedOnly ?? true);
+  const [includeNote, setIncludeNote] = useState(rule?.includeNote ?? false);
   const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -40,7 +41,7 @@ export function AutoApplyPanel({ rule, notReady, picks, remainingToday, sent }: 
     e.preventDefault();
     setErrors({});
     start(async () => {
-      const r = await saveRule({ roles: parseTerms(roles), locations: parseTerms(locations), includeRemote, minMatch, dailyCap, verifiedOnly, consent });
+      const r = await saveRule({ roles: parseTerms(roles), locations: parseTerms(locations), includeRemote, minMatch, dailyCap, verifiedOnly, includeNote, consent });
       if (r.ok) {
         toast({ title: r.message, tone: "success" });
         setConsent(false);
@@ -114,13 +115,20 @@ export function AutoApplyPanel({ rule, notReady, picks, remainingToday, sent }: 
               <span className="block text-xs text-muted">Recommended. Unverified companies are skipped.</span>
             </span>
           </label>
+          <label className="flex min-h-11 items-start gap-2 text-sm sm:col-span-2 md:min-h-0">
+            <input type="checkbox" className="mt-0.5 size-4" checked={includeNote} onChange={(e) => setIncludeNote(e.target.checked)} />
+            <span>
+              <span className="font-medium">Add a short cover note</span>
+              <span className="block text-xs text-muted">Names only skills on both your profile and the job, and your real match score. No other claims.</span>
+            </span>
+          </label>
         </Card>
 
         <Card className="grid gap-3 p-5">
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-0.5 size-4" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
             <span>
-              I want applications sent for me. Each goes in with my profile and resume and no cover note. I can undo one for 10 minutes and pause at any time.
+              I want applications sent for me. Each goes in with my profile and resume, with the short note only if I chose it above. I can undo one for 10 minutes and pause at any time.
             </span>
           </label>
           {err("consent")}

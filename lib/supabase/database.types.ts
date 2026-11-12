@@ -97,14 +97,14 @@ isOneToOne: false
                   ]
                 },"auto_apply_rules": {
                   Row: {
-                    "candidate_id": string,"created_at": string,"daily_cap": number,"enabled": boolean,"include_remote": boolean,"last_run_at": string | null,"locations": (string)[],"min_match": number,"roles": (string)[],"updated_at": string,"verified_only": boolean
+                    "candidate_id": string,"created_at": string,"daily_cap": number,"enabled": boolean,"include_note": boolean,"include_remote": boolean,"last_run_at": string | null,"locations": (string)[],"min_match": number,"roles": (string)[],"updated_at": string,"verified_only": boolean
                   }
                   ComputedFields: never
                   Insert: {
-                    "candidate_id"?: string,"created_at"?: string,"daily_cap"?: number,"enabled"?: boolean,"include_remote"?: boolean,"last_run_at"?: string | null,"locations"?: (string)[],"min_match"?: number,"roles": (string)[],"updated_at"?: string,"verified_only"?: boolean
+                    "candidate_id"?: string,"created_at"?: string,"daily_cap"?: number,"enabled"?: boolean,"include_note"?: boolean,"include_remote"?: boolean,"last_run_at"?: string | null,"locations"?: (string)[],"min_match"?: number,"roles": (string)[],"updated_at"?: string,"verified_only"?: boolean
                   }
                   Update: {
-                    "candidate_id"?: string,"created_at"?: string,"daily_cap"?: number,"enabled"?: boolean,"include_remote"?: boolean,"last_run_at"?: string | null,"locations"?: (string)[],"min_match"?: number,"roles"?: (string)[],"updated_at"?: string,"verified_only"?: boolean
+                    "candidate_id"?: string,"created_at"?: string,"daily_cap"?: number,"enabled"?: boolean,"include_note"?: boolean,"include_remote"?: boolean,"last_run_at"?: string | null,"locations"?: (string)[],"min_match"?: number,"roles"?: (string)[],"updated_at"?: string,"verified_only"?: boolean
                   }
                   Relationships: [
                     {
