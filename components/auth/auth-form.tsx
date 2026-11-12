@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,29 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
   }
   const err = (name: string) => blurErrors[name] ?? state?.fieldErrors?.[name];
 
+  // Remember the email used to sign in on this browser, so only the password needs typing next time.
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (mode !== "login") return;
+    try {
+      const saved = localStorage.getItem("jt-last-email");
+      const el = formRef.current?.elements.namedItem("email") as HTMLInputElement | null;
+      if (saved && el && !el.value) el.value = saved;
+    } catch {
+      /* storage blocked: nothing to prefill */
+    }
+  }, [mode]);
+  function rememberEmail() {
+    try {
+      const el = formRef.current?.elements.namedItem("email") as HTMLInputElement | null;
+      if (el?.value) localStorage.setItem("jt-last-email", el.value.trim());
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
-    <form action={action} noValidate className="grid gap-4">
+    <form ref={formRef} action={action} onSubmit={mode === "login" ? rememberEmail : undefined} noValidate className="grid gap-4">
       {next && <input type="hidden" name="next" value={next} />}
 
       {state?.message && (
