@@ -18,6 +18,8 @@ export interface ApplicationSummary {
   updatedAt: string;
   /** furthest pipeline stage reached, even if the application was later rejected */
   reached: number;
+  /** sent by the candidate's auto-apply rule rather than by hand */
+  autoApplied?: boolean;
   job: { id: string; slug: string; title: string; location: string; company: string };
 }
 
@@ -49,7 +51,7 @@ export function reachedStage(statuses: string[]): number {
 }
 
 function summary(r: {
-  id: string; status: string; created_at: string; updated_at: string; jobs: JobJoin | JobJoin[] | null; application_events?: { status: string }[];
+  id: string; status: string; created_at: string; updated_at: string; auto_applied?: boolean; jobs: JobJoin | JobJoin[] | null; application_events?: { status: string }[];
 }): ApplicationSummary | null {
   const job = one(r.jobs);
   if (!job || !isStatus(r.status)) return null;
@@ -58,6 +60,7 @@ function summary(r: {
     status: r.status,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
+    autoApplied: r.auto_applied ?? false,
     reached: reachedStage([r.status, ...(r.application_events ?? []).map((e) => e.status)]),
     job: { id: job.id, slug: job.slug, title: job.title, location: job.location, company: one(job.companies)?.name ?? "Unknown company" },
   };
@@ -70,7 +73,7 @@ export async function listMyApplications(userId: string): Promise<ApplicationSum
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
-    .select(`id, status, created_at, updated_at, ${JOB}, application_events(status)`)
+    .select(`id, status, created_at, updated_at, auto_applied, ${JOB}, application_events(status)`)
     .eq("candidate_id", userId)
     .order("updated_at", { ascending: false });
   if (error) throw new Error(`Could not load applications: ${error.message}`);

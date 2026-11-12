@@ -32,6 +32,7 @@ export function ApplicationRow({ application: a, href }: { application: Applicat
           <h2 className="text-base font-semibold leading-snug">{a.job.title}</h2>
           <p className="mt-0.5 text-sm text-muted">
             <span className="font-medium text-text">{a.job.company}</span> &middot; {a.job.location}
+            {a.autoApplied && <span className="ml-2 rounded-md bg-primary-soft px-1.5 py-0.5 text-xs font-medium text-primary" data-testid="auto-tag">Auto-applied</span>}
           </p>
           <p className="mt-1 text-xs text-muted">
             Applied {timeAgo(a.createdAt).toLowerCase()}

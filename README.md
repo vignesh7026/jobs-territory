@@ -78,12 +78,14 @@ candidate can edit or dismiss anything; nothing is ever sent automatically)
 - **Anonymous applying:** hide your name, college, employers and resume from reviewers until you are shortlisted.
 - **Interview experiences:** anonymous notes from people who applied to a company, summarised in three lines.
 - **Referral finder:** alumni from your college at the company, and people you know there, with draft messages.
+- **Auto-apply:** pick roles and places; the server applies for you to matching jobs within a match floor, a daily cap and (by default) verified companies only. Stale or vague listings are skipped, every automatic application is tagged and undoable for 10 minutes, and a pause switch stops it at once.
+- **Company verification:** every company shows Verified or Not verified; unverified ones carry a warning.
 
 ## Tests
 
 ```bash
-npm test                    # unit tests (259)
-npm run test:integration    # against local Supabase (37); run `npm run db:reset` first
+npm test                    # unit tests (286)
+npm run test:integration    # against local Supabase (43); run `npm run db:reset` first
 npm run db:test             # SQL security checks (row-level security, blind review, privacy); reset first
 npm run lint && npm run typecheck
 ```
@@ -131,6 +133,8 @@ skills proposed from a voice transcript are filtered to those actually spoken.
   one global admin role means no per-company reviewer scoping.
 - Speech recognition uses the browser's own service and is untested in CI (no microphone in headless Edge).
 - GitHub's anonymous rate limit (60 requests an hour per server address) can block portfolio scans on a busy deployment.
+- Auto-apply runs when the candidate opens Auto-apply or My Applications (at most every 30 minutes) and when the rule is saved; there is no background scheduler, so it does not apply while the candidate is away.
+- Verification state in the seed data is demo data; there is no admin screen to change it yet.
 - No moderation or reporting for interview notes; no email delivery (drafts are copied or opened in your mail app).
 - In-memory rate limiting per server instance; a shared store would be the next step at scale.
 - Lighthouse performance (mobile emulation, local production build, headless Edge, one run each): home 92, jobs list 86. LCP was 3.0 s and 3.5 s, total blocking time 200 ms and 280 ms, layout shift 0. A single local run is a spot check, not a benchmark.

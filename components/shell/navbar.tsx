@@ -15,6 +15,7 @@ const publicLinks = [{ href: "/jobs", label: "Jobs" }];
 const memberLinks = [
   { href: "/applications", label: "Applications" },
   { href: "/saved", label: "Saved" },
+  { href: "/auto-apply", label: "Auto-apply" },
   { href: "/practice", label: "Practice" },
   { href: "/career", label: "Career" },
 ];

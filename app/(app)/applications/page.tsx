@@ -10,6 +10,9 @@ import { requireUser } from "@/lib/auth/session";
 import { applicationHealth } from "@/lib/applications/health";
 import { isStatus } from "@/lib/applications/status";
 import { listMyApplications } from "@/lib/applications/queries";
+import { runAutoApply } from "@/lib/auto-apply-run";
+import { getMatchProfile } from "@/lib/profile/queries";
+import { createClient } from "@/lib/supabase/server";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +23,10 @@ export default async function ApplicationsPage(props: PageProps<"/applications">
   const sp = await props.searchParams;
   const view = sp.view === "board" ? "board" : "list";
   const status = typeof sp.status === "string" && isStatus(sp.status) ? sp.status : undefined;
+
+  // Opening this page is one of the moments an auto-apply rule is checked (at most every 30 minutes).
+  const mp = await getMatchProfile(user.id);
+  if (mp) await runAutoApply(await createClient(), user.id, mp);
 
   const all = await listMyApplications(user.id);
   const counts: Record<string, number> = {};

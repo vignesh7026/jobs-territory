@@ -71,14 +71,14 @@ isOneToOne: false
                   ]
                 },"applications": {
                   Row: {
-                    "anonymous": boolean,"candidate_id": string,"cover_note": string | null,"created_at": string,"id": string,"job_id": string,"resume_path": string | null,"status": Database["public"]['Enums']["application_status"],"updated_at": string
+                    "anonymous": boolean,"auto_applied": boolean,"candidate_id": string,"cover_note": string | null,"created_at": string,"id": string,"job_id": string,"resume_path": string | null,"status": Database["public"]['Enums']["application_status"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "anonymous"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id": string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
+                    "anonymous"?: boolean,"auto_applied"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id": string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
                   }
                   Update: {
-                    "anonymous"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id"?: string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
+                    "anonymous"?: boolean,"auto_applied"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id"?: string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -92,6 +92,26 @@ isOneToOne: false
       columns: ["job_id"]
 isOneToOne: false
       referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"auto_apply_rules": {
+                  Row: {
+                    "candidate_id": string,"created_at": string,"daily_cap": number,"enabled": boolean,"include_remote": boolean,"last_run_at": string | null,"locations": (string)[],"min_match": number,"roles": (string)[],"updated_at": string,"verified_only": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "candidate_id"?: string,"created_at"?: string,"daily_cap"?: number,"enabled"?: boolean,"include_remote"?: boolean,"last_run_at"?: string | null,"locations"?: (string)[],"min_match"?: number,"roles": (string)[],"updated_at"?: string,"verified_only"?: boolean
+                  }
+                  Update: {
+                    "candidate_id"?: string,"created_at"?: string,"daily_cap"?: number,"enabled"?: boolean,"include_remote"?: boolean,"last_run_at"?: string | null,"locations"?: (string)[],"min_match"?: number,"roles"?: (string)[],"updated_at"?: string,"verified_only"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "auto_apply_rules_candidate_id_fkey"
+      columns: ["candidate_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -330,6 +350,7 @@ isOneToOne: false
             "admin_set_application_status":
 { Args: { "p_application_id": string,"p_note"?: string,"p_status": Database["public"]['Enums']["application_status"] }; Returns: {
               "anonymous": boolean,
+"auto_applied": boolean,
 "candidate_id": string,
 "cover_note": string | null,
 "created_at": string,
