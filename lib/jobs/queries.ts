@@ -19,7 +19,7 @@ export interface JobListItem {
   firstPostedAt: string | null;
   repostCount: number;
   isVague: boolean;
-  company: { name: string; slug: string };
+  company: { name: string; slug: string; verified: boolean };
 }
 
 export interface SearchResult {
@@ -29,13 +29,13 @@ export interface SearchResult {
   pageCount: number;
 }
 
-const SELECT = "id, slug, title, location, work_mode, job_type, level, salary_min, salary_max, currency, posted_at, closes_at, skills, first_posted_at, repost_count, is_vague, companies(name, slug)";
+const SELECT = "id, slug, title, location, work_mode, job_type, level, salary_min, salary_max, currency, posted_at, closes_at, skills, first_posted_at, repost_count, is_vague, companies(name, slug, verified)";
 
 type Row = {
   id: string; slug: string; title: string; location: string; work_mode: WorkMode; job_type: JobType; level: JobLevel;
   salary_min: number | null; salary_max: number | null; currency: string; posted_at: string; closes_at: string | null; skills: string[];
   first_posted_at?: string | null; repost_count?: number; is_vague?: boolean | null;
-  companies: { name: string; slug: string } | { name: string; slug: string }[] | null;
+  companies: { name: string; slug: string; verified?: boolean } | { name: string; slug: string; verified?: boolean }[] | null;
 };
 
 export function toListItem(r: Row): JobListItem {
@@ -44,7 +44,7 @@ export function toListItem(r: Row): JobListItem {
     id: r.id, slug: r.slug, title: r.title, location: r.location, workMode: r.work_mode, jobType: r.job_type, level: r.level,
     salaryMin: r.salary_min, salaryMax: r.salary_max, currency: r.currency, postedAt: r.posted_at, closesAt: r.closes_at, skills: r.skills,
     firstPostedAt: r.first_posted_at ?? null, repostCount: r.repost_count ?? 0, isVague: r.is_vague ?? false,
-    company: company ?? { name: "Unknown company", slug: "" },
+    company: company ? { name: company.name, slug: company.slug, verified: company.verified ?? false } : { name: "Unknown company", slug: "", verified: false },
   };
 }
 

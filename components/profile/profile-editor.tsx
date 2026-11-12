@@ -67,6 +67,33 @@ export function ProfileEditor({ initial, initialResume, email, plan }: { initial
     if (Object.keys(serverErrors).length) setServerErrors({});
   }
 
+  // Keep an unsaved draft in this browser so a refresh, a closed tab or a failed save never loses typing. Keyed by
+  // email so a shared computer does not mix people up; cleared on a successful save.
+  const draftKey = `jt-profile-draft:${email}`;
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as ProfileValues;
+      if (JSON.stringify(draft) === JSON.stringify(initial)) return;
+      // Reading the browser's storage can only happen after mount, so this state change belongs in an effect.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setValues({ ...initial, ...draft });
+      toast({ title: "Restored your unsaved draft", description: "Press Save changes to keep it." });
+    } catch {
+      /* storage blocked or draft unreadable: start from the saved profile */
+    }
+    // Runs once on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    try {
+      if (dirty) localStorage.setItem(draftKey, JSON.stringify(values));
+    } catch {
+      /* ignore */
+    }
+  }, [dirty, values, draftKey]);
+
   // Warn before leaving with unsaved edits.
   useEffect(() => {
     if (!dirty) return;
@@ -99,6 +126,11 @@ export function ProfileEditor({ initial, initialResume, email, plan }: { initial
       const result = await saveProfile(values);
       if (result.ok) {
         setSnapshot(JSON.stringify(values));
+        try {
+          localStorage.removeItem(draftKey);
+        } catch {
+          /* ignore */
+        }
         toast({ title: "Profile saved", tone: "success" });
         router.refresh();
       } else {

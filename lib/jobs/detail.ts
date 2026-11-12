@@ -8,7 +8,7 @@ export interface JobDetail extends JobListItem {
   responsibilities: string[];
   requirements: string[];
   closed: boolean;
-  companyInfo: { id: string; name: string; slug: string; industry: string; size: string; hq: string; about: string };
+  companyInfo: { id: string; name: string; slug: string; industry: string; size: string; hq: string; about: string; verified: boolean; verifiedAt: string | null; verificationNote: string | null };
 }
 
 const SLUG = /^[a-z0-9][a-z0-9-]{0,119}$/;
@@ -18,7 +18,7 @@ export async function getJobBySlug(slug: string): Promise<JobDetail | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("jobs")
-    .select("id, slug, title, location, work_mode, job_type, level, salary_min, salary_max, currency, posted_at, closes_at, skills, first_posted_at, repost_count, is_vague, summary, responsibilities, requirements, companies(id, name, slug, industry, size, hq, about)")
+    .select("id, slug, title, location, work_mode, job_type, level, salary_min, salary_max, currency, posted_at, closes_at, skills, first_posted_at, repost_count, is_vague, summary, responsibilities, requirements, companies(id, name, slug, industry, size, hq, about, verified, verified_at, verification_note)")
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw new Error(`Could not load job: ${error.message}`);
@@ -32,7 +32,10 @@ export async function getJobBySlug(slug: string): Promise<JobDetail | null> {
     responsibilities: data.responsibilities,
     requirements: data.requirements,
     closed: Boolean(data.closes_at && new Date(data.closes_at) <= new Date()),
-    companyInfo: company,
+    companyInfo: {
+      id: company.id, name: company.name, slug: company.slug, industry: company.industry, size: company.size, hq: company.hq, about: company.about,
+      verified: company.verified, verifiedAt: company.verified_at, verificationNote: company.verification_note,
+    },
   };
 }
 

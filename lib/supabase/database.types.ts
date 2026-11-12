@@ -97,14 +97,14 @@ isOneToOne: false
                   ]
                 },"companies": {
                   Row: {
-                    "about": string,"hq": string,"id": string,"industry": string,"name": string,"size": string,"slug": string
+                    "about": string,"hq": string,"id": string,"industry": string,"name": string,"size": string,"slug": string,"verification_note": string | null,"verified": boolean,"verified_at": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "about": string,"hq": string,"id"?: string,"industry": string,"name": string,"size": string,"slug": string
+                    "about": string,"hq": string,"id"?: string,"industry": string,"name": string,"size": string,"slug": string,"verification_note"?: string | null,"verified"?: boolean,"verified_at"?: string | null
                   }
                   Update: {
-                    "about"?: string,"hq"?: string,"id"?: string,"industry"?: string,"name"?: string,"size"?: string,"slug"?: string
+                    "about"?: string,"hq"?: string,"id"?: string,"industry"?: string,"name"?: string,"size"?: string,"slug"?: string,"verification_note"?: string | null,"verified"?: boolean,"verified_at"?: string | null
                   }
                   Relationships: [
                     

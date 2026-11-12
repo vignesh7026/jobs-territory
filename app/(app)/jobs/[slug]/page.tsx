@@ -28,6 +28,7 @@ import { getMatchProfile } from "@/lib/profile/queries";
 import { getSavedJobIds } from "@/lib/saved/queries";
 import { CompareToggle } from "@/components/compare/compare-toggle";
 import { SaveButton } from "@/components/saved/save-button";
+import { VerifiedBadge } from "@/components/jobs/verified-badge";
 
 const MODE_ICON: Record<WorkMode, React.ReactNode> = { onsite: <Building2 />, hybrid: <ArrowLeftRight />, remote: <Laptop /> };
 
@@ -83,7 +84,13 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
             <div className="flex items-center gap-3">
               <CompanyMark name={c.name} className="size-12" style={{ viewTransitionName: "job-mark" }} />
               <p className="text-base font-medium">{c.name}</p>
+              <VerifiedBadge verified={c.verified} note={c.verificationNote} />
             </div>
+            {!c.verified && (
+              <p role="note" className="mt-3 rounded-md border border-warning/40 bg-warning/10 p-3 text-sm" data-testid="unverified-note">
+                We have not verified {c.name} yet. Check the company yourself before sharing personal details, and never pay money to apply or to be hired.
+              </p>
+            )}
             <h1 className="mt-4 text-3xl md:text-4xl" style={{ viewTransitionName: "job-title" }}>
               {job.title}
             </h1>

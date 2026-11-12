@@ -19,6 +19,8 @@ insert into public.companies (slug, name, industry, size, hq, about) values
   ('basil-commerce', 'Basil & Co.', 'E-commerce', '201-500', 'Kochi', 'Online marketplace for spices, handloom and home goods from small producers in Kerala.'),
   ('vantage-retail', 'Vantage Retail Systems', 'Retail technology', '1001-5000', 'Austin', 'Point-of-sale, inventory and loyalty software used in 9,000 stores across North America.');
 
+update public.companies set verified = true, verified_at = now() - interval '30 days', verification_note = 'Company registration and email domain checked by an admin.' where slug not in ('halcyon-design', 'aster-mobility', 'basil-commerce');
+
 insert into public.company_contacts (company_id, kind, full_name, title, email, slug, background) values
   ((select id from public.companies where slug = 'jobs-territory'), 'founder', 'Arvind Shetty', 'Founder and CEO', 'arvind.shetty@jobs-territory.example', 'jobs-territory-arvind-shetty', 'built staffing software for eight years across Coimbatore agencies'),
   ((select id from public.companies where slug = 'jobs-territory'), 'recruiter', 'Divya Raghunathan', 'Talent Partner', 'divya.raghunathan@jobs-territory.example', 'jobs-territory-divya-raghunathan', 'spent six years placing engineers at South Indian product companies'),

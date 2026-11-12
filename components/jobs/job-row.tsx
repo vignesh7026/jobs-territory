@@ -10,6 +10,7 @@ import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { Tilt } from "@/components/jobs/tilt";
 import { MORPH_JOB_ATTR, VT_NAMES, morphToJob } from "@/lib/morph";
 import { Badge } from "@/components/ui/badge";
+import { VerifiedBadge } from "@/components/jobs/verified-badge";
 import { GHOST_LABEL, ghostCheck } from "@/lib/ghost";
 import { t } from "@/lib/motion";
 import { LEVEL_LABELS, MODE_LABELS, TYPE_LABELS, type WorkMode } from "@/lib/jobs/filters";
@@ -62,6 +63,7 @@ export function JobRow({ job, index, match, saved, signedIn, quick }: { job: Job
           </h2>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted">
             <span className="font-medium text-text">{job.company.name}</span>
+            <VerifiedBadge verified={job.company.verified} />
             <span aria-hidden="true">&middot;</span>
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3.5" aria-hidden="true" /> {job.location}

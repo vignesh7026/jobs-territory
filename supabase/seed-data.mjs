@@ -21,6 +21,11 @@ export const companies = [
   ['vantage-retail', 'Vantage Retail Systems', 'Retail technology', '1001-5000', 'Austin', 'Point-of-sale, inventory and loyalty software used in 9,000 stores across North America.'],
 ];
 
+// Demo verification state. Companies listed here are NOT verified; every other company is shown as verified, with the
+// note below. In a real deployment an admin would set this after checking the company's registration and email domain.
+export const unverifiedCompanies = ['halcyon-design', 'aster-mobility', 'basil-commerce'];
+export const verificationNote = 'Company registration and email domain checked by an admin.';
+
 // slug, company, title, location, mode, type, level, salaryMin, salaryMax, currency, skills, summary, responsibilities, requirements, postedHoursAgo, closesInDays
 export const jobs = [
   ['software-engineering-intern-wfo', 'jobs-territory', 'Software Engineering Intern (Work from Office)', 'Coimbatore', 'onsite', 'internship', 'intern', 216000, 324000, 'INR',
