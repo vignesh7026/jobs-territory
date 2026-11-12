@@ -197,14 +197,14 @@ isOneToOne: false
                   ]
                 },"interview_insights": {
                   Row: {
-                    "author_id": string | null,"company_id": string,"created_at": string,"difficulty": number,"experience": string,"id": string,"is_sample": boolean,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number
+                    "author_id": string | null,"company_id": string,"created_at": string,"difficulty": number,"experience": string,"hidden": boolean,"id": string,"is_sample": boolean,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "author_id"?: string | null,"company_id": string,"created_at"?: string,"difficulty": number,"experience": string,"id"?: string,"is_sample"?: boolean,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number
+                    "author_id"?: string | null,"company_id": string,"created_at"?: string,"difficulty": number,"experience": string,"hidden"?: boolean,"id"?: string,"is_sample"?: boolean,"outcome": Database["public"]['Enums']["insight_outcome"],"role_title": string,"rounds": number
                   }
                   Update: {
-                    "author_id"?: string | null,"company_id"?: string,"created_at"?: string,"difficulty"?: number,"experience"?: string,"id"?: string,"is_sample"?: boolean,"outcome"?: Database["public"]['Enums']["insight_outcome"],"role_title"?: string,"rounds"?: number
+                    "author_id"?: string | null,"company_id"?: string,"created_at"?: string,"difficulty"?: number,"experience"?: string,"hidden"?: boolean,"id"?: string,"is_sample"?: boolean,"outcome"?: Database["public"]['Enums']["insight_outcome"],"role_title"?: string,"rounds"?: number
                   }
                   Relationships: [
                     {
@@ -254,6 +254,32 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"reports": {
+                  Row: {
+                    "created_at": string,"detail": string | null,"id": string,"kind": Database["public"]['Enums']["report_kind"],"reason": Database["public"]['Enums']["report_reason"],"reporter_id": string,"resolved_at": string | null,"resolved_by": string | null,"status": Database["public"]['Enums']["report_status"],"target_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"detail"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["report_kind"],"reason": Database["public"]['Enums']["report_reason"],"reporter_id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"target_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"detail"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["report_kind"],"reason"?: Database["public"]['Enums']["report_reason"],"reporter_id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"target_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "reports_reporter_id_fkey"
+      columns: ["reporter_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "reports_resolved_by_fkey"
+      columns: ["resolved_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"roadmap_items": {
                   Row: {
@@ -347,7 +373,26 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "admin_set_application_status":
+            "admin_resolve_report":
+{ Args: { "p_action": string,"p_report": string }; Returns: {
+              "created_at": string,
+"detail": string | null,
+"id": string,
+"kind": Database["public"]['Enums']["report_kind"],
+"reason": Database["public"]['Enums']["report_reason"],
+"reporter_id": string,
+"resolved_at": string | null,
+"resolved_by": string | null,
+"status": Database["public"]['Enums']["report_status"],
+"target_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "reports"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"admin_set_application_status":
 { Args: { "p_application_id": string,"p_note"?: string,"p_status": Database["public"]['Enums']["application_status"] }; Returns: {
               "anonymous": boolean,
 "auto_applied": boolean,
@@ -417,7 +462,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "app_role": "candidate"|"admin","application_status": "applied"|"under_review"|"shortlisted"|"interview"|"offered"|"rejected","insight_outcome": "offer"|"rejected"|"no_answer"|"withdrew","job_level": "intern"|"junior"|"mid"|"senior"|"lead","job_type": "full_time"|"part_time"|"contract"|"internship","work_mode": "onsite"|"hybrid"|"remote"
+            "app_role": "candidate"|"admin","application_status": "applied"|"under_review"|"shortlisted"|"interview"|"offered"|"rejected","insight_outcome": "offer"|"rejected"|"no_answer"|"withdrew","job_level": "intern"|"junior"|"mid"|"senior"|"lead","job_type": "full_time"|"part_time"|"contract"|"internship","report_kind": "job"|"company"|"insight","report_reason": "fake_company"|"asks_for_money"|"misleading"|"abusive"|"other","report_status": "open"|"actioned"|"dismissed","work_mode": "onsite"|"hybrid"|"remote"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -537,7 +582,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "app_role": ["candidate", "admin"],"application_status": ["applied", "under_review", "shortlisted", "interview", "offered", "rejected"],"insight_outcome": ["offer", "rejected", "no_answer", "withdrew"],"job_level": ["intern", "junior", "mid", "senior", "lead"],"job_type": ["full_time", "part_time", "contract", "internship"],"work_mode": ["onsite", "hybrid", "remote"]
+            "app_role": ["candidate", "admin"],"application_status": ["applied", "under_review", "shortlisted", "interview", "offered", "rejected"],"insight_outcome": ["offer", "rejected", "no_answer", "withdrew"],"job_level": ["intern", "junior", "mid", "senior", "lead"],"job_type": ["full_time", "part_time", "contract", "internship"],"report_kind": ["job", "company", "insight"],"report_reason": ["fake_company", "asks_for_money", "misleading", "abusive", "other"],"report_status": ["open", "actioned", "dismissed"],"work_mode": ["onsite", "hybrid", "remote"]
           }
         }
 } as const

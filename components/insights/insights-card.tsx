@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { OUTCOMES, OUTCOME_LABEL, insightStats, plainInsightSummary, type Insight, type Outcome } from "@/lib/insights";
 import { timeAgo } from "@/lib/format";
+import { ReportButton } from "@/components/reports/report-button";
 
 const select = "h-11 rounded-md border border-border bg-surface px-2 text-sm md:h-10";
 
@@ -96,6 +97,7 @@ export function InsightsCard({ companyId, companyName, jobSlug, jobTitle, insigh
                 {n.isSample && <span className="rounded border border-border px-1.5 py-0.5">Sample note (demo data)</span>}
               </p>
               <p className="mt-1.5 leading-relaxed">{n.experience}</p>
+              {!n.mine && !n.isSample && <div className="mt-1"><ReportButton kind="insight" targetId={n.id} label="Report this note" signedIn={signedIn} /></div>}
               {n.mine && (
                 <button type="button" onClick={() => remove(n.id)} disabled={pending} className="mt-2 text-xs text-primary underline-offset-4 hover:underline">
                   Remove my note

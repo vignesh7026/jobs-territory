@@ -28,6 +28,7 @@ import { getMatchProfile } from "@/lib/profile/queries";
 import { getSavedJobIds } from "@/lib/saved/queries";
 import { CompareToggle } from "@/components/compare/compare-toggle";
 import { SaveButton } from "@/components/saved/save-button";
+import { ReportButton } from "@/components/reports/report-button";
 import { VerifiedBadge } from "@/components/jobs/verified-badge";
 
 const MODE_ICON: Record<WorkMode, React.ReactNode> = { onsite: <Building2 />, hybrid: <ArrowLeftRight />, remote: <Laptop /> };
@@ -198,6 +199,10 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
               {c.industry} &middot; {c.size} people &middot; {c.hq}
             </p>
             <p className="mt-3 text-sm leading-relaxed">{c.about}</p>
+            <div className="mt-3 flex flex-wrap gap-x-4">
+              <ReportButton kind="job" targetId={job.id} label="Report this job" signedIn={Boolean(user)} />
+              <ReportButton kind="company" targetId={c.id} label="Report this company" signedIn={Boolean(user)} />
+            </div>
           </Card>
         </aside>
       </div>

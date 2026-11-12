@@ -87,7 +87,7 @@ export function CommandPalette({ user }: { user: { role: "candidate" | "admin" }
         go("Practice interviews", "/practice", "mock interview questions timer"),
         go("Profile", "/profile", "resume skills account experience"),
       );
-      if (user.role === "admin") base.push(go("Admin queue", "/admin/applications", "review change status"), go("Admin: verify companies", "/admin/companies", "verified fake trust"));
+      if (user.role === "admin") base.push(go("Admin queue", "/admin/applications", "review change status"), go("Admin: verify companies", "/admin/companies", "verified fake trust"), go("Admin: reports", "/admin/reports", "flagged moderation fake abuse"));
     } else {
       base.push(go("Sign in", "/login"), go("Create account", "/register", "register sign up"));
     }

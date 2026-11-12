@@ -73,6 +73,9 @@ export function UserMenu({ user }: { user: MenuUser }) {
               <Link role="menuitem" href="/admin/companies" className={item} onClick={() => setOpen(false)}>
                 <ShieldCheck /> Admin: companies
               </Link>
+              <Link role="menuitem" href="/admin/reports" className={item} onClick={() => setOpen(false)}>
+                <ShieldCheck /> Admin: reports
+              </Link>
             </>
           )}
           <form action={logout}>
