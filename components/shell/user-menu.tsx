@@ -66,9 +66,14 @@ export function UserMenu({ user }: { user: MenuUser }) {
             <UserRound /> Profile
           </Link>
           {user.role === "admin" && (
-            <Link role="menuitem" href="/admin/applications" className={item} onClick={() => setOpen(false)}>
-              <ShieldCheck /> Admin
-            </Link>
+            <>
+              <Link role="menuitem" href="/admin/applications" className={item} onClick={() => setOpen(false)}>
+                <ShieldCheck /> Admin: applications
+              </Link>
+              <Link role="menuitem" href="/admin/companies" className={item} onClick={() => setOpen(false)}>
+                <ShieldCheck /> Admin: companies
+              </Link>
+            </>
           )}
           <form action={logout}>
             <button role="menuitem" type="submit" className={item}>

@@ -4,7 +4,7 @@ import { daysUntil, formatSalary, timeAgo } from "@/lib/format";
 
 describe("parseFilters", () => {
   it("returns clean defaults for an empty URL", () => {
-    expect(parseFilters({})).toEqual({ q: "", location: "", types: [], modes: [], levels: [], quick: false, sort: "newest", page: 1 });
+    expect(parseFilters({})).toEqual({ q: "", location: "", types: [], modes: [], levels: [], quick: false, verified: false, sort: "newest", page: 1 });
   });
 
   it("reads comma-separated and repeated values, keeps canonical order and drops unknown ones", () => {
@@ -139,5 +139,16 @@ describe("pageWindow", () => {
     expect(activeChips(f).map((c) => c.label)).toEqual(["Quick apply"]);
     expect(activeChips(f)[0].without.quick).toBe(false);
     expect(toSearchParams(parseFilters({})).has("quick")).toBe(false);
+  });
+});
+
+describe("verified-only filter", () => {
+  it("round-trips through the URL and shows as a removable chip", () => {
+    const f = parseFilters({ verified: "1" });
+    expect(f.verified).toBe(true);
+    expect(toSearchParams(f).get("verified")).toBe("1");
+    expect(activeChips(f).map((c) => c.label)).toContain("Verified companies");
+    expect(activeChips(f)[0].without.verified).toBe(false);
+    expect(toSearchParams(parseFilters({})).has("verified")).toBe(false);
   });
 });

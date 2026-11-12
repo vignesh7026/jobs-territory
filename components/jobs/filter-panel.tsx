@@ -53,6 +53,13 @@ export function FilterPanel({ signedIn }: { signedIn: boolean }) {
               <span className="block text-xs text-muted">{signedIn ? "Jobs you match at 60% or more, apply in one tap" : "Sign in to use this"}</span>
             </span>
           </label>
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md px-2 py-2 text-sm hover:bg-primary-soft md:min-h-9">
+            <input type="checkbox" checked={filters.verified} onChange={() => push(withFilters(filters, { verified: !filters.verified }))} className="mt-0.5 size-4 accent-[var(--primary)]" />
+            <span>
+              Verified companies only
+              <span className="block text-xs text-muted">Hide companies an admin has not checked</span>
+            </span>
+          </label>
         </fieldset>
         <Group legend="Job type" options={JOB_TYPES} labels={TYPE_LABELS} selected={filters.types} onToggle={(v) => push(withFilters(filters, { types: toggle(filters.types, v) }))} />
         <Group legend="Work mode" options={WORK_MODES} labels={MODE_LABELS} selected={filters.modes} onToggle={(v) => push(withFilters(filters, { modes: toggle(filters.modes, v) }))} />

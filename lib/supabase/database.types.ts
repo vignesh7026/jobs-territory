@@ -366,6 +366,25 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"admin_set_company_verified":
+{ Args: { "p_company": string,"p_note"?: string,"p_verified": boolean }; Returns: {
+              "about": string,
+"hq": string,
+"id": string,
+"industry": string,
+"name": string,
+"size": string,
+"slug": string,
+"verification_note": string | null,
+"verified": boolean,
+"verified_at": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "companies"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "application_transition_allowed":
 { Args: { "p_from": Database["public"]['Enums']["application_status"],"p_to": Database["public"]['Enums']["application_status"] }; Returns: boolean
                            },

@@ -38,9 +38,12 @@ export default async function JobsPage(props: PageProps<"/jobs">) {
     else quickNote = readiness.reason;
   }
   const applied = quickOn ? await getAppliedJobIds(user!.id) : new Set<string>();
-  const result = quickOn
-    ? await searchQuickApply(filters, (j) => isQuickApplyJob({ score: matchOf(j), applied: applied.has(j.id), closed: false }))
-    : await searchJobs({ ...filters, quick: false });
+  // Quick apply and verified-only both depend on things the search function does not hold (the candidate's profile,
+  // the company's verification), so they filter the database's ordered results here.
+  const result =
+    quickOn || filters.verified
+      ? await searchQuickApply(filters, (j) => (!filters.verified || j.company.verified) && (!quickOn || isQuickApplyJob({ score: matchOf(j), applied: applied.has(j.id), closed: false })))
+      : await searchJobs({ ...filters, quick: false, verified: false });
 
   // Asked for a page past the end (an old link, say): go to the last real page, keeping the filters.
   if (result.page !== filters.page) redirect(filtersHref({ ...filters, page: result.page }));
@@ -50,7 +53,7 @@ export default async function JobsPage(props: PageProps<"/jobs">) {
 
   const savedIds = [...(await getSavedJobIds(user?.id ?? null))];
 
-  const cleared: JobFilters = { ...filters, q: "", location: "", types: [], modes: [], levels: [], quick: false, page: 1, sort: "newest" };
+  const cleared: JobFilters = { ...filters, q: "", location: "", types: [], modes: [], levels: [], quick: false, verified: false, page: 1, sort: "newest" };
 
   return (
     <SearchProvider filters={filters}>

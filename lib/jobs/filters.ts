@@ -23,6 +23,8 @@ export interface JobFilters {
   levels: JobLevel[];
   /** only jobs the candidate can apply to in one tap with their current profile (see lib/quick-apply.ts) */
   quick: boolean;
+  /** only companies an admin has verified */
+  verified: boolean;
   sort: Sort;
   page: number;
 }
@@ -59,7 +61,7 @@ export function parseFilters(raw: Raw): JobFilters {
   const pageRaw = Number.parseInt(all(raw, "page")[0] ?? "1", 10);
   const page = Number.isFinite(pageRaw) ? Math.min(Math.max(pageRaw, 1), MAX_PAGE) : 1;
 
-  return { q, location, types: pick(raw, "type", JOB_TYPES), modes: pick(raw, "mode", WORK_MODES), levels: pick(raw, "level", JOB_LEVELS), quick: all(raw, "quick")[0] === "1", sort, page };
+  return { q, location, types: pick(raw, "type", JOB_TYPES), modes: pick(raw, "mode", WORK_MODES), levels: pick(raw, "level", JOB_LEVELS), quick: all(raw, "quick")[0] === "1", verified: all(raw, "verified")[0] === "1", sort, page };
 }
 
 /** Canonical query string: defaults are omitted so equal searches always produce the same URL. */
@@ -71,6 +73,7 @@ export function toSearchParams(f: JobFilters): URLSearchParams {
   if (f.modes.length) p.set("mode", f.modes.join(","));
   if (f.levels.length) p.set("level", f.levels.join(","));
   if (f.quick) p.set("quick", "1");
+  if (f.verified) p.set("verified", "1");
   if (f.sort !== defaultSort(f.q)) p.set("sort", f.sort);
   if (f.page > 1) p.set("page", String(f.page));
   return p;
@@ -106,6 +109,7 @@ export function activeChips(f: JobFilters): FilterChip[] {
   for (const m of f.modes) chips.push({ id: `mode:${m}`, label: MODE_LABELS[m], without: withFilters(f, { modes: f.modes.filter((x) => x !== m) }) });
   for (const l of f.levels) chips.push({ id: `level:${l}`, label: LEVEL_LABELS[l], without: withFilters(f, { levels: f.levels.filter((x) => x !== l) }) });
   if (f.quick) chips.push({ id: "quick", label: "Quick apply", without: withFilters(f, { quick: false }) });
+  if (f.verified) chips.push({ id: "verified", label: "Verified companies", without: withFilters(f, { verified: false }) });
   return chips;
 }
 
