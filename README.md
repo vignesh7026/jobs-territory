@@ -44,6 +44,7 @@ The candidate (Meera Krishnan) has six applications at different stages. The adm
 | `SUPABASE_SERVICE_ROLE_KEY`     | server only | Used for the AI cache table and nothing else                                          |
 | `GROQ_API_KEY`                  | server only | Optional. AI provider (default model `openai/gpt-oss-120b`, override with `GROQ_MODEL`) |
 | `ANTHROPIC_API_KEY`             | server only | Optional. Used if `GROQ_API_KEY` is empty (`ANTHROPIC_MODEL` to override)             |
+| `CRON_SECRET`                  | server only | Optional. Enables the scheduled auto-apply endpoint; leave empty to keep it off        |
 
 With no AI key set, every AI feature falls back to a plain, rule-based result and says so. `.env.local` is git-ignored.
 Never put a key in a `NEXT_PUBLIC_` variable.
@@ -79,15 +80,22 @@ candidate can edit or dismiss anything; nothing is ever sent automatically)
 - **Interview experiences:** anonymous notes from people who applied to a company, summarised in three lines.
 - **Referral finder:** alumni from your college at the company, and people you know there, with draft messages.
 - **Auto-apply:** pick roles and places; the server applies for you to matching jobs within a match floor, a daily cap and (by default) verified companies only. Stale or vague listings are skipped, every automatic application is tagged and undoable for 10 minutes, and a pause switch stops it at once.
+- **Reports and moderation:** report a job, company or interview note; three different reporters hide a note automatically; admins work a queue (dismiss, or close the listing / remove verification / hide the note).
+- **Admin verification screen and verified-only filter:** admins verify a company with a note on how it was checked; candidates can hide unverified companies.
+- **Saved-search alerts:** each saved search shows how many matching jobs were posted since you last opened it.
+- **Interview date:** record when it is; download a calendar file with reminders a day and an hour before.
+- **Outcomes card:** reply rate, typical wait, applications waiting longer than usual, and auto-applied vs hand-applied, from your own history only.
+- **Scheduled auto-apply:** `GET /api/cron/auto-apply` (secret-protected) runs every enabled rule; optional short cover note built from real matching skills.
 - **Company verification:** every company shows Verified or Not verified; unverified ones carry a warning.
 
 ## Tests
 
 ```bash
-npm test                    # unit tests (286)
-npm run test:integration    # against local Supabase (43); run `npm run db:reset` first
+npm test                    # unit tests (306)
+npm run test:integration    # against local Supabase (52); run `npm run db:reset` first
 npm run db:test             # SQL security checks (row-level security, blind review, privacy); reset first
 npm run lint && npm run typecheck
+npm run e2e:batch           # headless-Edge browser checks (see e2e/README.md); also e2e:auto, e2e:draft, e2e:persist
 ```
 
 The security checks assert, in the database itself: candidates see only their own profile, applications and plans;
@@ -133,8 +141,9 @@ skills proposed from a voice transcript are filtered to those actually spoken.
   one global admin role means no per-company reviewer scoping.
 - Speech recognition uses the browser's own service and is untested in CI (no microphone in headless Edge).
 - GitHub's anonymous rate limit (60 requests an hour per server address) can block portfolio scans on a busy deployment.
-- Auto-apply runs when the candidate opens Auto-apply or My Applications (at most every 30 minutes) and when the rule is saved; there is no background scheduler, so it does not apply while the candidate is away.
-- Verification state in the seed data is demo data; there is no admin screen to change it yet.
+- Auto-apply runs when the candidate opens Auto-apply or My Applications (at most every 30 minutes), when the rule is saved, and from the scheduled endpoint `/api/cron/auto-apply` once it is deployed with `CRON_SECRET` set (`vercel.json` schedules it daily; Vercel Hobby allows one run a day).
+- Not built: email delivery (alerts and status changes are in-app only), a hosted deployment, and error monitoring. Each needs an account or a new dependency.
+- Verification state in the seed data is demo data; admins change it at /admin/companies.
 - No moderation or reporting for interview notes; no email delivery (drafts are copied or opened in your mail app).
 - In-memory rate limiting per server instance; a shared store would be the next step at scale.
 - Lighthouse performance (mobile emulation, local production build, headless Edge, one run each): home 92, jobs list 86. LCP was 3.0 s and 3.5 s, total blocking time 200 ms and 280 ms, layout shift 0. A single local run is a spot check, not a benchmark.
