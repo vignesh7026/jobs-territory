@@ -10,6 +10,8 @@ import { requireUser } from "@/lib/auth/session";
 import { applicationHealth } from "@/lib/applications/health";
 import { isStatus } from "@/lib/applications/status";
 import { listMyApplications } from "@/lib/applications/queries";
+import { OutcomesCard } from "@/components/applications/outcomes-card";
+import { computeOutcomes } from "@/lib/outcomes";
 import { runAutoApply } from "@/lib/auto-apply-run";
 import { getMatchProfile } from "@/lib/profile/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -29,6 +31,7 @@ export default async function ApplicationsPage(props: PageProps<"/applications">
   if (mp) await runAutoApply(await createClient(), user.id, mp);
 
   const all = await listMyApplications(user.id);
+  const outcomes = computeOutcomes(all.map((a) => ({ status: a.status, createdAt: a.createdAt, firstResponseAt: a.firstResponseAt ?? null, autoApplied: a.autoApplied ?? false })));
   const counts: Record<string, number> = {};
   for (const a of all) counts[a.status] = (counts[a.status] ?? 0) + 1;
   const shown = status ? all.filter((a) => a.status === status) : all;
@@ -55,6 +58,7 @@ export default async function ApplicationsPage(props: PageProps<"/applications">
       </div>
 
       <div className="mt-6">
+        {outcomes && <OutcomesCard o={outcomes} />}
         {all.length === 0 ? (
           <EmptyState icon={<Inbox />} title="You have not applied to any jobs yet" description="When you apply, each application appears here with its status and a history of every change.">
             <Link href="/jobs" className={buttonVariants({ variant: "primary" })}>

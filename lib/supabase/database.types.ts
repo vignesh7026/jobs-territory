@@ -71,14 +71,14 @@ isOneToOne: false
                   ]
                 },"applications": {
                   Row: {
-                    "anonymous": boolean,"auto_applied": boolean,"candidate_id": string,"cover_note": string | null,"created_at": string,"id": string,"job_id": string,"resume_path": string | null,"status": Database["public"]['Enums']["application_status"],"updated_at": string
+                    "anonymous": boolean,"auto_applied": boolean,"candidate_id": string,"cover_note": string | null,"created_at": string,"id": string,"interview_at": string | null,"job_id": string,"resume_path": string | null,"status": Database["public"]['Enums']["application_status"],"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "anonymous"?: boolean,"auto_applied"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id": string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
+                    "anonymous"?: boolean,"auto_applied"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"interview_at"?: string | null,"job_id": string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
                   }
                   Update: {
-                    "anonymous"?: boolean,"auto_applied"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"job_id"?: string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
+                    "anonymous"?: boolean,"auto_applied"?: boolean,"candidate_id"?: string,"cover_note"?: string | null,"created_at"?: string,"id"?: string,"interview_at"?: string | null,"job_id"?: string,"resume_path"?: string | null,"status"?: Database["public"]['Enums']["application_status"],"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -329,14 +329,14 @@ isOneToOne: false
                   ]
                 },"saved_searches": {
                   Row: {
-                    "candidate_id": string,"created_at": string,"id": string,"name": string,"query": NonNullable<Json>
+                    "candidate_id": string,"created_at": string,"id": string,"last_seen_at": string,"name": string,"query": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "candidate_id"?: string,"created_at"?: string,"id"?: string,"name": string,"query": NonNullable<Json>
+                    "candidate_id"?: string,"created_at"?: string,"id"?: string,"last_seen_at"?: string,"name": string,"query": NonNullable<Json>
                   }
                   Update: {
-                    "candidate_id"?: string,"created_at"?: string,"id"?: string,"name"?: string,"query"?: NonNullable<Json>
+                    "candidate_id"?: string,"created_at"?: string,"id"?: string,"last_seen_at"?: string,"name"?: string,"query"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -400,6 +400,7 @@ isOneToOne: false
 "cover_note": string | null,
 "created_at": string,
 "id": string,
+"interview_at": string | null,
 "job_id": string,
 "resume_path": string | null,
 "status": Database["public"]['Enums']["application_status"],
@@ -456,6 +457,9 @@ isOneToOne: false
 { Args: { "p_levels"?: (Database["public"]['Enums']["job_level"])[],"p_limit"?: number,"p_location"?: string,"p_modes"?: (Database["public"]['Enums']["work_mode"])[],"p_offset"?: number,"p_q"?: string,"p_sort"?: string,"p_types"?: (Database["public"]['Enums']["job_type"])[] }; Returns: {
               "job_id": string,"total": number
             }[]
+                           },
+"set_interview_time":
+{ Args: { "p_application": string,"p_at": string }; Returns: string
                            },
 "undo_application":
 { Args: { "p_application_id": string }; Returns: undefined

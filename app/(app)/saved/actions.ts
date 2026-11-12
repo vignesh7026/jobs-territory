@@ -69,3 +69,15 @@ export async function deleteSavedSearch(id: string): Promise<ActionResult> {
   revalidatePath("/saved");
   return { ok: true };
 }
+
+/** The candidate opened a saved search: everything posted so far counts as seen. */
+export async function markSearchSeen(id: string): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, message: "Sign in first." };
+  if (!uuid.safeParse(id).success) return { ok: false, message: "That search is not valid." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("saved_searches").update({ last_seen_at: new Date().toISOString() }).eq("id", id).eq("candidate_id", user.id);
+  if (error) return { ok: false, message: "We could not update that. Try again." };
+  revalidatePath("/saved");
+  return { ok: true };
+}

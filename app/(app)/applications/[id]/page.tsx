@@ -5,6 +5,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { AdminStatusPanel } from "@/components/admin/status-panel";
 import { EventLog } from "@/components/applications/event-log";
 import { FollowUpPanel } from "@/components/applications/follow-up-panel";
+import { InterviewPanel } from "@/components/applications/interview-panel";
 import { NegotiationPanel } from "@/components/applications/negotiation-panel";
 import { HealthMeter } from "@/components/applications/health-meter";
 import { applicationHealth } from "@/lib/applications/health";
@@ -94,6 +95,8 @@ export default async function ApplicationPage(props: PageProps<"/applications/[i
               </div>
             </Card>
           )}
+
+          {isOwner && <InterviewPanel applicationId={app.id} interviewAt={app.interviewAt ?? null} canSet={app.status === "shortlisted" || app.status === "interview"} />}
 
           {isOwner && app.status === "offered" && (
             <Card className="p-5">

@@ -7,13 +7,14 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/lib/auth/session";
 import { computeMatch } from "@/lib/match";
 import { getMatchProfile } from "@/lib/profile/queries";
-import { listSavedJobs, listSavedSearches } from "@/lib/saved/queries";
+import { countNewMatches, listSavedJobs, listSavedSearches } from "@/lib/saved/queries";
 
 export const metadata: Metadata = { title: "Saved" };
 
 export default async function SavedPage() {
   const user = await requireUser("/saved");
   const [jobs, searches, mp] = await Promise.all([listSavedJobs(user.id), listSavedSearches(user.id), getMatchProfile(user.id)]);
+  const fresh = await countNewMatches(searches);
   const matches = mp ? Object.fromEntries(jobs.map((j) => [j.id, computeMatch(mp, { skills: j.skills, level: j.level, workMode: j.workMode, location: j.location, title: j.title }).score])) : undefined;
 
   return (
@@ -42,7 +43,7 @@ export default async function SavedPage() {
             Saved searches <span className="text-base font-normal tabular-nums text-muted">({searches.length})</span>
           </h2>
           {searches.length > 0 ? (
-            <SavedSearchList searches={searches.map((s) => ({ id: s.id, name: s.name, href: s.href, filters: s.filters }))} />
+            <SavedSearchList searches={searches.map((s) => ({ id: s.id, name: s.name, href: s.href, filters: s.filters, fresh: fresh[s.id] }))} />
           ) : (
             <EmptyState icon={<Search />} title="No saved searches yet" description="Search for something, add a filter or two, then choose Save this search. Run it again later with one click.">
               <Link href="/jobs" className={buttonVariants({ variant: "secondary" })}>

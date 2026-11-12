@@ -20,6 +20,10 @@ export interface ApplicationSummary {
   reached: number;
   /** sent by the candidate's auto-apply rule rather than by hand */
   autoApplied?: boolean;
+  /** when the candidate said their interview is (ISO), if they did */
+  interviewAt?: string | null;
+  /** first event after "applied": the first sign anyone acted on it */
+  firstResponseAt?: string | null;
   job: { id: string; slug: string; title: string; location: string; company: string };
 }
 
@@ -51,7 +55,7 @@ export function reachedStage(statuses: string[]): number {
 }
 
 function summary(r: {
-  id: string; status: string; created_at: string; updated_at: string; auto_applied?: boolean; jobs: JobJoin | JobJoin[] | null; application_events?: { status: string }[];
+  id: string; status: string; created_at: string; updated_at: string; auto_applied?: boolean; interview_at?: string | null; jobs: JobJoin | JobJoin[] | null; application_events?: { status: string; created_at?: string }[];
 }): ApplicationSummary | null {
   const job = one(r.jobs);
   if (!job || !isStatus(r.status)) return null;
@@ -61,6 +65,8 @@ function summary(r: {
     createdAt: r.created_at,
     updatedAt: r.updated_at,
     autoApplied: r.auto_applied ?? false,
+    interviewAt: r.interview_at ?? null,
+    firstResponseAt: (r.application_events ?? []).filter((e) => e.status !== "applied" && e.created_at).map((e) => e.created_at as string).sort()[0] ?? null,
     reached: reachedStage([r.status, ...(r.application_events ?? []).map((e) => e.status)]),
     job: { id: job.id, slug: job.slug, title: job.title, location: job.location, company: one(job.companies)?.name ?? "Unknown company" },
   };
@@ -73,7 +79,7 @@ export async function listMyApplications(userId: string): Promise<ApplicationSum
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
-    .select(`id, status, created_at, updated_at, auto_applied, ${JOB}, application_events(status)`)
+    .select(`id, status, created_at, updated_at, auto_applied, interview_at, ${JOB}, application_events(status, created_at)`)
     .eq("candidate_id", userId)
     .order("updated_at", { ascending: false });
   if (error) throw new Error(`Could not load applications: ${error.message}`);
@@ -88,7 +94,7 @@ export async function getApplication(id: string): Promise<ApplicationDetail | nu
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
-    .select(`id, status, created_at, updated_at, candidate_id, cover_note, resume_path, anonymous, ${JOB}, application_events(id, status, note, actor_id, created_at)`)
+    .select(`id, status, created_at, updated_at, candidate_id, cover_note, resume_path, anonymous, interview_at, ${JOB}, application_events(id, status, note, actor_id, created_at)`)
     .eq("id", id)
     .order("created_at", { referencedTable: "application_events", ascending: true })
     .maybeSingle();

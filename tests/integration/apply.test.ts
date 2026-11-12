@@ -179,3 +179,28 @@ describe("status rules: TypeScript and database agree", () => {
     expect(mismatches).toEqual([]);
   });
 });
+
+describe("interview time", () => {
+  it("is refused before shortlisting, only the owner can set it, and out-of-range dates are refused", async () => {
+    const c = await newCandidate();
+    const r = await applyToJob(c, { jobId: await jobId("analytics-engineer") });
+    if (r.status !== 201) throw new Error("apply failed");
+    const soon = new Date(Date.now() + 3 * 864e5).toISOString();
+    expect((await c.rpc("set_interview_time", { p_application: r.application.id, p_at: soon })).error?.code).toBe("22023");
+
+    const admin = fresh();
+    await admin.auth.signInWithPassword({ email: "admin@jobsterritory.example", password: "Demo-Admin-26" });
+    expect((await admin.rpc("admin_set_application_status", { p_application_id: r.application.id, p_status: "under_review" })).error).toBeNull();
+    expect((await admin.rpc("admin_set_application_status", { p_application_id: r.application.id, p_status: "shortlisted" })).error).toBeNull();
+
+    expect((await c.rpc("set_interview_time", { p_application: r.application.id, p_at: soon })).error).toBeNull();
+    expect((await c.rpc("set_interview_time", { p_application: r.application.id, p_at: new Date(Date.now() + 400 * 864e5).toISOString() })).error?.code).toBe("22008");
+    // someone else cannot set it
+    const other = await newCandidate();
+    expect((await other.rpc("set_interview_time", { p_application: r.application.id, p_at: soon })).error?.code).toBe("P0002");
+    // and it cannot be written directly
+    expect((await c.from("applications").update({ interview_at: soon }).eq("id", r.application.id)).error).not.toBeNull();
+    // clearing works
+    expect((await c.rpc("set_interview_time", { p_application: r.application.id, p_at: null as never })).error).toBeNull();
+  });
+});
