@@ -20,6 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { profileStrength } from "@/lib/profile-strength";
 import { mergeSkills } from "@/lib/voice-profile";
 import { profileSchema } from "@/lib/validation/profile";
+import type { ParsedResume } from "@/lib/resume";
+import { fillFromResume } from "@/lib/resume/to-profile";
 import { pathErrors } from "@/lib/validation/shared";
 
 export interface ProfileValues {
@@ -113,6 +115,35 @@ export function ProfileEditor({ initial, initialResume, email, plan }: { initial
     hasResume: resume !== null,
   });
 
+  /** A resume was uploaded and read: fill what is empty, then save so a new profile is complete without extra steps. */
+  function onResumeRead(parsed: ParsedResume | null, personName: string, readError?: string) {
+    if (!parsed) {
+      toast({ title: "Resume uploaded", description: readError ?? "We could not read it automatically. Fill in your details below.", tone: "success" });
+      return;
+    }
+    const { values: next, filled } = fillFromResume(values, parsed, personName);
+    if (filled.length === 0) {
+      toast({ title: "Resume uploaded", description: "Your profile already has everything we could read from it.", tone: "success" });
+      return;
+    }
+    setValues(next);
+    const check = profileSchema.safeParse(next);
+    if (!check.success) {
+      toast({ title: "Filled from your resume", description: `${filled.join(", ")}. Check the highlighted fields, then press Save changes.`, tone: "success" });
+      setTouched((t) => new Set([...t, ...Object.keys(pathErrors(check.error))]));
+      return;
+    }
+    startSaving(async () => {
+      const result = await saveProfile(next);
+      if (result.ok) {
+        setSnapshot(JSON.stringify(next));
+        try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+        toast({ title: "Profile filled from your resume", description: `${filled.join(", ")}. Review it and edit anything below.`, tone: "success" });
+        router.refresh();
+      } else toast({ title: "Filled from your resume", description: "Press Save changes to keep it.", tone: "success" });
+    });
+  }
+
   function onSave(e: React.FormEvent) {
     e.preventDefault();
     const bad = Object.keys(clientErrors);
@@ -144,7 +175,7 @@ export function ProfileEditor({ initial, initialResume, email, plan }: { initial
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
       <aside className="grid gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
         <StrengthMeter score={strength.score} next={strength.next} />
-        <ResumeCard resume={resume} onChange={setResume} />
+        <ResumeCard resume={resume} onChange={setResume} onRead={onResumeRead} />
         {plan && (
           <Card className="p-5" data-testid="plan-card">
             <h2 className="text-base">Learning plan</h2>

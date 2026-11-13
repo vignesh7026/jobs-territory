@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/shell/toaster";
+import type { ParsedResume } from "@/lib/resume";
 import { validateResumeFile } from "@/lib/validation/profile";
 
 export interface ResumeState {
   name: string;
 }
 
-export function ResumeCard({ resume, onChange }: { resume: ResumeState | null; onChange: (r: ResumeState | null) => void }) {
+export function ResumeCard({ resume, onChange, onRead }: { resume: ResumeState | null; onChange: (r: ResumeState | null) => void; onRead?: (parsed: ParsedResume | null, personName: string, readError?: string) => void }) {
   const input = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [busy, setBusy] = useState<"upload" | "remove" | null>(null);
@@ -29,10 +30,11 @@ export function ResumeCard({ resume, onChange }: { resume: ResumeState | null; o
       const body = new FormData();
       body.set("file", file);
       const res = await fetch("/api/resume", { method: "POST", body });
-      const json = (await res.json().catch(() => ({}))) as { name?: string; error?: string };
+      const json = (await res.json().catch(() => ({}))) as { name?: string; error?: string; parsed?: ParsedResume; personName?: string; readError?: string };
       if (!res.ok || !json.name) return setError(json.error ?? "Upload failed. Try again.");
       onChange({ name: json.name });
-      toast({ title: "Resume uploaded", tone: "success" });
+      if (onRead) onRead(json.parsed ?? null, json.personName ?? "", json.readError);
+      else toast({ title: "Resume uploaded", tone: "success" });
     } catch {
       setError("We could not reach the server. Check your connection and try again.");
     } finally {
@@ -57,7 +59,7 @@ export function ResumeCard({ resume, onChange }: { resume: ResumeState | null; o
   return (
     <Card id="resume" className="scroll-mt-24 p-4">
       <h2 className="text-base">Resume</h2>
-      <p className="mt-1 text-sm text-muted">PDF, up to 2 MB. Recruiters see the version you had when you applied.</p>
+      <p className="mt-1 text-sm text-muted">PDF, up to 2 MB. We read it and fill in your profile for you; you can edit anything afterwards. Recruiters see the version you had when you applied.</p>
 
       {resume ? (
         <div className="mt-3 flex items-center gap-3 rounded-md border border-border bg-bg p-3">
@@ -79,7 +81,7 @@ export function ResumeCard({ resume, onChange }: { resume: ResumeState | null; o
       <input ref={input} id="resume-file" type="file" accept="application/pdf,.pdf" className="sr-only" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} aria-describedby={error ? "resume-error" : undefined} />
       <Button variant="secondary" className="mt-3 w-full" onClick={() => input.current?.click()} disabled={busy !== null}>
         {busy === "upload" ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Upload aria-hidden="true" />}
-        {busy === "upload" ? "Uploading" : resume ? "Replace PDF" : "Upload PDF"}
+        {busy === "upload" ? "Reading your resume" : resume ? "Replace PDF and re-read" : "Upload PDF and fill my profile"}
       </Button>
       {error && (
         <p id="resume-error" role="alert" className="mt-2 text-sm text-danger-fg">

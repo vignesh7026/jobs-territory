@@ -18,7 +18,8 @@
     "e2e:auto": "node e2e/auto.mjs",
     "e2e:batch": "node e2e/batch.mjs",
     "e2e:draft": "node e2e/draft.mjs",
-    "e2e:persist": "node e2e/persist.mjs"
+    "e2e:persist": "node e2e/persist.mjs",
+    "e2e:resume": "node e2e/resume.mjs"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.17",

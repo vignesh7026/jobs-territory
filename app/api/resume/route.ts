@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
+import { readResume } from "@/lib/resume";
 import { createClient } from "@/lib/supabase/server";
 import { RESUME_MAX_BYTES, safeFileName, validateResumeFile } from "@/lib/validation/profile";
 
@@ -48,7 +49,13 @@ export async function POST(request: Request) {
   }
   if (before?.resume_path) await supabase.storage.from(BUCKET).remove([before.resume_path]);
 
-  return NextResponse.json({ path, name: displayName(path) });
+  // Read the resume so the profile can fill itself in. A resume that cannot be read (a scan, say) is still stored.
+  const read = readResume(bytes, file.name);
+  return NextResponse.json({
+    path,
+    name: displayName(path),
+    ...(read.ok ? { parsed: read.parsed, personName: read.name } : { readError: read.error }),
+  });
 }
 
 /** Remove the resume. Applications keep the path they snapshotted, but the file is gone, so they show no download. */
