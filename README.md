@@ -8,6 +8,8 @@ learning roadmap, contact profiles for recruiters and founders, and blind (anony
 Built with Next.js 16 (App Router, TypeScript strict), Tailwind, Framer Motion, Supabase (Postgres, Auth, Storage, row-level
 security) and Zod. AI features call a model from the server only.
 
+**Live demo:** https://jobs-territory-ten.vercel.app (hosted on Vercel and Supabase; see DEPLOY.md). Smoke test: `node e2e/live.mjs <url>`.
+
 > All companies, people, jobs, emails and interview notes in the seed data are fictional. Emails use the reserved
 > `.example` domain. Nothing in the app can reach a real person.
 
