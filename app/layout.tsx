@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { IBM_Plex_Sans, Newsreader } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/shell/navbar";
 import { Toaster } from "@/components/shell/toaster";
@@ -10,8 +10,10 @@ import { CompareProvider } from "@/components/compare/compare-provider";
 import { CompareTray } from "@/components/compare/compare-tray";
 import { getCurrentUser } from "@/lib/auth/session";
 
-const manrope = Manrope({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-manrope", display: "swap" });
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-inter", display: "swap" });
+// Newsreader (a text serif) for headings and IBM Plex Sans for the interface: a calmer, more editorial pairing than the
+// usual geometric sans, and Plex has clear numerals for salaries and scores.
+const heading = Newsreader({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-heading", display: "swap" });
+const body = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Jobs Territory", template: "%s | Jobs Territory" },
@@ -19,16 +21,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F7F6F2" },
-    { media: "(prefers-color-scheme: dark)", color: "#0F1417" },
-  ],
+  themeColor: "#F7F6F2",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const user = await getCurrentUser();
   return (
-    <html lang="en" className={`${manrope.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${heading.variable} ${body.variable}`} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>

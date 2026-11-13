@@ -70,7 +70,7 @@
     @apply bg-bg font-sans text-base text-text antialiased;
     font-variant-numeric: tabular-nums; /* salaries, dates, scores */
   }
-  h1, h2, h3, h4 { @apply font-heading font-bold text-text; }
+  h1, h2, h3, h4 { @apply font-heading font-semibold tracking-tight text-text; }
   :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
   ::selection { background: var(--primary-soft); }
 }

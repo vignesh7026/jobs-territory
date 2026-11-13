@@ -40,8 +40,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ["var(--font-manrope)", "system-ui", "sans-serif"],
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        heading: ["var(--font-heading)", "Georgia", "serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       // Scale 12 / 14 / 16 / 20 / 24 / 32 / 44. Body 1.5, headings 1.2.
       fontSize: {
