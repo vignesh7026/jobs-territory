@@ -24,6 +24,9 @@ import { daysUntil, formatSalary, timeAgo } from "@/lib/format";
 import { getCompanyContacts, getJobBySlug, getMyApplication, getMyResumeName } from "@/lib/jobs/detail";
 import { LEVEL_LABELS, MODE_LABELS, TYPE_LABELS, type WorkMode } from "@/lib/jobs/filters";
 import { computeMatch, fallbackExplanation } from "@/lib/match";
+import { fitReport } from "@/lib/fit";
+import { getFitProfile } from "@/lib/fit-queries";
+import { FitReportCard } from "@/components/match/fit-report";
 import { getMatchProfile } from "@/lib/profile/queries";
 import { getSavedJobIds } from "@/lib/saved/queries";
 import { CompareToggle } from "@/components/compare/compare-toggle";
@@ -62,6 +65,8 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
   const [application, resumeName] = user ? await Promise.all([getMyApplication(job.id), getMyResumeName(user.id)]) : [null, null];
 
   const matchProfile = await getMatchProfile(user?.id ?? null);
+  const fitProfile = await getFitProfile(user?.id ?? null);
+  const fit = fitProfile ? fitReport(fitProfile, { title: job.title, level: job.level, workMode: job.workMode, location: job.location, skills: job.skills, summary: job.summary, responsibilities: job.responsibilities, requirements: job.requirements }) : null;
   const match = matchProfile ? computeMatch(matchProfile, { skills: job.skills, level: job.level, workMode: job.workMode, location: job.location, title: job.title }) : null;
 
   const [insights, appliedHere] = user ? await Promise.all([getInsights(job.companyInfo.id), hasAppliedToCompany(user.id, job.companyInfo.id)]) : [[], false];
@@ -184,6 +189,7 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
           {match ? (
             <>
               <MatchCard match={match} explanation={fallbackExplanation(match, job.skills.length)} jobSkillCount={job.skills.length} jobId={job.id} />
+              {fit && <FitReportCard report={fit} jobTitle={job.title} />}
               <GapCard match={match} jobId={job.id} />
             </>
           ) : (
@@ -191,7 +197,7 @@ export default async function JobPage(props: PageProps<"/jobs/[slug]">) {
           )}
           <GhostCard job={{ firstPostedAt: job.firstPostedAt, postedAt: job.postedAt, repostCount: job.repostCount, isVague: job.isVague }} />
           <ReachOut responseNote={responseNote} contacts={contacts} jobTitle={job.title} company={c.name} signInHref={user ? null : `/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
-          <ReferralCard companyId={c.id} companyName={c.name} jobSlug={job.slug} jobTitle={job.title} firstName={user?.fullName.split(/s+/)[0] ?? ""} sharedSkills={match?.matched ?? []} alumni={referral?.alumni ?? []} connections={referral?.connections ?? []} colleges={referral?.colleges ?? []} signedIn={Boolean(user)} loginHref={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
+          <ReferralCard companyId={c.id} companyName={c.name} jobSlug={job.slug} jobTitle={job.title} firstName={user?.fullName.split(/\s+/)[0] ?? ""} sharedSkills={match?.matched ?? []} alumni={referral?.alumni ?? []} connections={referral?.connections ?? []} colleges={referral?.colleges ?? []} signedIn={Boolean(user)} loginHref={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
           <InsightsCard companyId={c.id} companyName={c.name} jobSlug={job.slug} jobTitle={job.title} insights={insights} canShare={appliedHere} signedIn={Boolean(user)} loginHref={`/login?next=${encodeURIComponent(`/jobs/${job.slug}`)}`} />
           <Card className="p-5">
             <h2 className="text-base">About {c.name}</h2>

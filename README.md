@@ -82,6 +82,9 @@ candidate can edit or dismiss anything; nothing is ever sent automatically)
 - **Interview experiences:** anonymous notes from people who applied to a company, summarised in three lines.
 - **Referral finder:** alumni from your college at the company, and people you know there, with draft messages.
 - **Auto-apply:** pick roles and places; the server applies for you to matching jobs within a match floor, a daily cap and (by default) verified companies only. Stale or vague listings are skipped, every automatic application is tagged and undoable for 10 minutes, and a pause switch stops it at once.
+- **Automatic resume reading:** upload a PDF and the profile fills itself in (name, contact, headline, summary, skills, roles, education, GitHub) and saves; everything stays editable, and it only fills what is empty.
+- **Profile vs job report:** every job page shows your profile compared with the listing as a score out of 100 (skills 45, experience 20, role relevance 10, education 5, location 10, profile basics 10), what each part is based on, the skills you lack, skills only the description mentions, and a prioritised list of what is missing from your profile. `/fit` does the same for any pasted job description.
+- **Data:** 33 companies and 130 jobs across about 30 role families (engineering, data, design, content, marketing, sales, support, HR, finance, operations, legal, teaching, healthcare, civil, mechanical, embedded), all fictional.
 - **Reports and moderation:** report a job, company or interview note; three different reporters hide a note automatically; admins work a queue (dismiss, or close the listing / remove verification / hide the note).
 - **Admin verification screen and verified-only filter:** admins verify a company with a note on how it was checked; candidates can hide unverified companies.
 - **Saved-search alerts:** each saved search shows how many matching jobs were posted since you last opened it.
@@ -93,11 +96,11 @@ candidate can edit or dismiss anything; nothing is ever sent automatically)
 ## Tests
 
 ```bash
-npm test                    # unit tests (306)
+npm test                    # unit tests (343)
 npm run test:integration    # against local Supabase (52); run `npm run db:reset` first
 npm run db:test             # SQL security checks (row-level security, blind review, privacy); reset first
 npm run lint && npm run typecheck
-npm run e2e:batch           # headless-Edge browser checks (see e2e/README.md); also e2e:auto, e2e:draft, e2e:persist
+npm run e2e:batch           # headless-Edge browser checks (see e2e/README.md); also e2e:auto, e2e:draft, e2e:persist, e2e:resume, e2e:fit
 ```
 
 The security checks assert, in the database itself: candidates see only their own profile, applications and plans;
@@ -106,7 +109,7 @@ interview-note authors are never exposed; anonymous visitors read only jobs and 
 
 ## Design and motion
 
-Design tokens (colour, type, spacing, radius) follow the brief and live in `app/globals.css` and `tailwind.config.ts`.
+Light theme is the default (the system dark setting is ignored; dark only if chosen). Type is Newsreader for headings and IBM Plex Sans for the interface. Design tokens (colour, type, spacing, radius) follow the brief and live in `app/globals.css` and `tailwind.config.ts`.
 One deliberate deviation: the brief's exact status and semantic colours fail WCAG AA as *text* on the page background.
 Fills, borders and icons keep the exact values; text uses a slightly darker or lighter variant (`-fg`) of the same hue,
 enforced by `tests/contrast.test.ts`. Status is always icon plus label, never colour alone.
@@ -141,6 +144,8 @@ skills proposed from a voice transcript are filtered to those actually spoken.
 - The reply-time and market-range figures are only as good as the number of listings and applications on this site, and say so.
 - Anonymous applying hides structured fields; free text (a cover note, role descriptions) can still identify someone, and
   one global admin role means no per-company reviewer scoping.
+- Resume reading is rule-based: it handles PDFs with a text layer (not scans) and misses unusual layouts, so the profile page asks you to review. Word files are not accepted yet.
+- The profile-vs-job score compares texts by rules; it is not a prediction of whether you will be hired.
 - Speech recognition uses the browser's own service and is untested in CI (no microphone in headless Edge).
 - GitHub's anonymous rate limit (60 requests an hour per server address) can block portfolio scans on a busy deployment.
 - Auto-apply runs when the candidate opens Auto-apply or My Applications (at most every 30 minutes), when the rule is saved, and from the scheduled endpoint `/api/cron/auto-apply` once it is deployed with `CRON_SECRET` set (`vercel.json` schedules it daily; Vercel Hobby allows one run a day).

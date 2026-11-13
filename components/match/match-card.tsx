@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 
 const SEVERITY_LABEL = { high: "Big gap", medium: "Worth knowing", low: "Minor" } as const;
 
-/** Your match: score, two plain lines, and the skills you have and lack. */
+/** Skill match: score, two plain lines, and the skills you have and lack. */
 export function MatchCard({ match, explanation, jobSkillCount, jobId }: { match: MatchResult; explanation: [string, string]; jobSkillCount: number; jobId: string }) {
   return (
     <Card className="p-5">
-      <h2 className="text-base">Your match</h2>
+      <h2 className="text-base">Skill match</h2>
       <div className="mt-3 flex items-center gap-4">
         <MatchRing score={match.score} />
         <div className="min-w-0">
@@ -80,7 +80,7 @@ export function GapCard({ match, jobId }: { match: MatchResult; jobId: string })
 export function MatchSignIn({ href }: { href: string }) {
   return (
     <Card className="p-5">
-      <h2 className="text-base">Your match</h2>
+      <h2 className="text-base">Skill match</h2>
       <p className="mt-2 text-sm text-muted">Sign in to see how your skills line up with this job, and what could count against you.</p>
       <Link href={href} className="mt-3 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">
         Sign in

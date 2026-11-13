@@ -121,3 +121,18 @@ describe("tiers and the plain-language fallback", () => {
     expect(fallbackExplanation(m, 4)[0]).toBe("None of the 4 skills listed for this job are on your profile.");
   });
 });
+
+describe("estimateYears with year-only ranges", () => {
+  const now = new Date("2026-06-01T00:00:00Z");
+  it("reads 2022 - 2025 as about three years, counted January to December", () => {
+    expect(estimateYears(["2022 - 2025"], now)).toBe(4);
+    expect(estimateYears(["2019-2023"], now)).toBe(5);
+  });
+  it("reads an open range up to now, and merges overlaps with month ranges", () => {
+    expect(estimateYears(["2024 - Present"], now)).toBe(2.5);
+    expect(estimateYears(["Jan 2022 - Dec 2022", "2022 - 2023"], now)).toBe(2);
+  });
+  it("still returns null for text with no dates", () => {
+    expect(estimateYears(["recently", ""], now)).toBeNull();
+  });
+});

@@ -84,6 +84,7 @@ export function CommandPalette({ user }: { user: { role: "candidate" | "admin" }
         go("Saved jobs and searches", "/saved", "bookmarks"),
         go("Auto-apply rules", "/auto-apply", "automatic applications role location rule pause"),
         go("Career path and learning plan", "/career", "timeline roadmap skills plan growth"),
+        go("Check a job description against my profile", "/fit", "jd paste compare score missing fit"),
         go("Practice interviews", "/practice", "mock interview questions timer"),
         go("Profile", "/profile", "resume skills account experience"),
       );

@@ -25,7 +25,7 @@ EDUCATION
 B.E. Computer Science and Engineering
 PSG College of Technology, Coimbatore 2019 - 2023
 `;
-const esc = (s) => s.replace(/\/g, '\\').replace(/\(/g, '\(').replace(/\)/g, '\)');
+const esc = (s) => s.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
 const body = ['BT', '/F1 11 Tf', '72 760 Td', ...TEXT.split('\n').map((l) => `0 -14 Td (${esc(l)}) Tj`), 'ET'].join('\n');
 const pdf = `%PDF-1.4\n1 0 obj\n<< /Length ${body.length} >>\nstream\n${body}\nendstream\nendobj\ntrailer\n<< >>\n%%EOF\n`;
 const file = (process.env.TEMP || '.') + '/e2e-resume.pdf';
@@ -39,7 +39,7 @@ await b.click('form button[type=submit]'); await b.sleep(5000);
 check('lands on the profile', (await b.url()).startsWith('/profile'), await b.url());
 check('profile starts empty', (await b.js(`document.querySelector('#headline').value`)) === '');
 
-await b.setFiles('#resume-file', [file.replace(/\/g, '/')]);
+await b.setFiles('#resume-file', [file.replace(/\\/g, '/')]);
 await b.sleep(6000);
 check('headline filled from the resume', (await b.js(`document.querySelector('#headline').value`)) === 'Frontend Developer', await b.js(`document.querySelector('#headline').value`));
 const page = await b.text('main');

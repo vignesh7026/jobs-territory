@@ -11,6 +11,8 @@ database freshly seeded (`npm run db:reset`) and a `CRON_SECRET` in `.env.local`
 | `auto`     | Auto-apply: consent required, applies, tags in My Applications, pause                                    |
 | `batch`    | Cron endpoint auth, outcomes card, interview + calendar file, saved-search alerts, reports, admin verify |
 | `draft`    | Unsaved profile draft is restored after a reload and cleared by saving                                   |
+| `resume`   | New account uploads a PDF resume: the profile fills itself in, saves, and stays editable                  |
+| `fit`      | Light theme by default, fonts, fit report on a job page, pasted-JD check                                |
 | `persist`  | Still signed in after the web server restarts; sign-in remembers the email                               |
 
 Run from the portal folder: `npm run e2e:auto`, `e2e:batch`, `e2e:draft`, `e2e:persist`. Reset the database between runs

@@ -176,6 +176,11 @@ export function ProfileEditor({ initial, initialResume, email, plan }: { initial
       <aside className="grid gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
         <StrengthMeter score={strength.score} next={strength.next} />
         <ResumeCard resume={resume} onChange={setResume} onRead={onResumeRead} />
+        <Card className="p-4" data-testid="fit-link">
+          <h2 className="text-base">Compare with a job</h2>
+          <p className="mt-1 text-sm text-muted">Paste any job description and see your score out of 100 and what your profile is missing.</p>
+          <Link href="/fit" className="mt-2 inline-flex min-h-9 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">Check a job description</Link>
+        </Card>
         {plan && (
           <Card className="p-5" data-testid="plan-card">
             <h2 className="text-base">Learning plan</h2>
