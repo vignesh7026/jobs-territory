@@ -19,10 +19,13 @@ async function search(args: Args = {}) {
   return { total: Number(data?.[0]?.total ?? 0), jobs: ids.map((id) => byId.get(id)!) };
 }
 
+// 130 seeded jobs, 2 of them closed.
+const OPEN_JOBS = 128;
+
 describe("search_jobs", () => {
   it("returns open jobs only: the two closed listings are hidden", async () => {
     const r = await search();
-    expect(r.total).toBe(36);
+    expect(r.total).toBe(OPEN_JOBS);
     expect(r.jobs.every((j) => !j.closes_at || new Date(j.closes_at) > new Date())).toBe(true);
     expect(r.jobs.map((j) => j.title)).not.toContain("UI Artist, Game UI");
   });
@@ -35,7 +38,7 @@ describe("search_jobs", () => {
   });
 
   it("finds jobs by company name and by skill", async () => {
-    expect((await search({ p_q: "brightwell" })).jobs.length).toBe(3);
+    expect((await search({ p_q: "brightwell" })).jobs.length).toBe(5);
     expect((await search({ p_q: "kubernetes" })).jobs.map((j) => j.title)).toContain("Site Reliability Engineer");
   });
 
@@ -79,7 +82,7 @@ describe("search_jobs", () => {
   it("paginates without overlap and reports the same total on every page", async () => {
     const p1 = await search({ p_limit: 12, p_offset: 0 });
     const p2 = await search({ p_limit: 12, p_offset: 12 });
-    const p4 = await search({ p_limit: 12, p_offset: 36 });
+    const p4 = await search({ p_limit: 12, p_offset: OPEN_JOBS });
     expect(p1.jobs).toHaveLength(12);
     expect(p2.total).toBe(p1.total);
     expect(new Set([...p1.jobs, ...p2.jobs].map((j) => j.id)).size).toBe(24);
@@ -90,13 +93,13 @@ describe("search_jobs", () => {
     // Words are extracted and everything else is discarded, so these narrow the results like any other words would.
     for (const q of ["x' or 1=1 --", "'; drop table jobs; --", "react & !dev | (a)"]) {
       const r = await search({ p_q: q });
-      expect(r.total).toBeLessThan(36);
+      expect(r.total).toBeLessThan(OPEN_JOBS);
     }
     // Pure punctuation has no searchable words, so it behaves like an empty keyword (and never errors).
-    for (const q of [":*", "\\", "!!!", "   "]) expect((await search({ p_q: q })).total).toBe(36);
+    for (const q of [":*", "\\", "!!!", "   "]) expect((await search({ p_q: q })).total).toBe(OPEN_JOBS);
     expect((await search({ p_location: "%" })).total).toBe(0); // % is not a wildcard
     expect((await search({ p_location: "_" })).total).toBe(0);
-    expect((await search()).total).toBe(36); // and the table is intact
+    expect((await search()).total).toBe(OPEN_JOBS); // and the table is intact
   });
 
   it("clamps absurd page sizes", async () => {

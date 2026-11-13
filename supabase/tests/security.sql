@@ -144,7 +144,7 @@ select pg_temp.reset();
 
 -- contacts: signed-in candidates can read them but never change them ------
 select pg_temp.act_as('11111111-1111-4111-8111-111111111111');
-select pg_temp.check_that((select count(*) from public.company_contacts) = 34, 'candidate sees a founder and a recruiter for each of 17 companies');
+select pg_temp.check_that((select count(*) from public.company_contacts) = 66, 'candidate sees a founder and a recruiter for each of 33 companies');
 select pg_temp.check_that((select applications from public.company_response('tamarind-health')) >= 1, 'candidate gets reply-time aggregates');
 select pg_temp.expect_error($$update public.company_contacts set email = 'x@y.z'$$, '42501', 'candidate cannot edit contacts');
 select pg_temp.reset();

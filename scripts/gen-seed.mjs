@@ -1,6 +1,19 @@
 // Generates supabase/seed.sql from supabase/seed-data.mjs.   npm run seed:gen
 import { writeFileSync } from "node:fs";
-import { unverifiedCompanies, verificationNote, backgrounds, companies, contacts, employees, jobs, sampleInsights, staleListings, vagueListing, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
+import { unverifiedCompanies as baseUnverified, verificationNote, backgrounds as baseBackgrounds, companies as baseCompanies, contacts as baseContacts, employees as baseEmployees, jobs as baseJobs, sampleInsights, staleListings, vagueListing, demo, demoProfile, demoApplications } from "../supabase/seed-data.mjs";
+import { moreCompanies, moreUnverified, moreContacts, moreBackgrounds, moreEmployees, moreJobs } from "../supabase/seed-more.mjs";
+
+// The original hand-written data plus the extra companies and roles.
+const companies = [...baseCompanies, ...moreCompanies];
+const unverifiedCompanies = [...baseUnverified, ...moreUnverified];
+const contacts = [...baseContacts, ...moreContacts];
+const backgrounds = { ...baseBackgrounds, ...moreBackgrounds };
+const employees = [...baseEmployees, ...moreEmployees];
+const jobs = [...baseJobs, ...moreJobs.map((j) => [j.slug, j.co, j.title, j.loc, j.mode, j.type, j.level, j.min, j.max, j.currency, j.skills, j.summary, j.resp, j.req, j.hrs, j.closes])];
+const dupes = jobs.map((j) => j[0]).filter((x, i, a) => a.indexOf(x) !== i);
+if (dupes.length) throw new Error(`Duplicate job slugs: ${dupes.join(", ")}`);
+const known = new Set(companies.map((c) => c[0]));
+for (const j of jobs) if (!known.has(j[1])) throw new Error(`Job ${j[0]} names unknown company ${j[1]}`);
 
 const q = (s) => (s == null ? "null" : `'${String(s).replace(/'/g, "''")}'`);
 const arr = (a) => `array[${a.map(q).join(", ")}]::text[]`;
