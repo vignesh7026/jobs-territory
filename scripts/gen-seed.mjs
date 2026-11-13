@@ -50,7 +50,7 @@ sql.push(sampleInsights.map(([co, role, rounds, diff, outcome, text], i) => `  (
 // Demo auth users (password is bcrypt-hashed by the database). Token columns must be '' not null for GoTrue.
 for (const u of Object.values(demo)) {
   sql.push(`insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, recovery_token, email_change, email_change_token_new)
-values ('00000000-0000-0000-0000-000000000000', ${q(u.id)}, 'authenticated', 'authenticated', ${q(u.email)}, crypt(${q(u.password)}, gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}'::jsonb, ${json({ full_name: u.name })}, now(), now(), '', '', '', '');`);
+values ('00000000-0000-0000-0000-000000000000', ${q(u.id)}, 'authenticated', 'authenticated', ${q(u.email)}, extensions.crypt(${q(u.password)}, extensions.gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}'::jsonb, ${json({ full_name: u.name })}, now(), now(), '', '', '', '');`);
   sql.push(`insert into auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
 values (gen_random_uuid(), ${q(u.id)}, ${json({ sub: u.id, email: u.email, email_verified: true })}, 'email', ${q(u.id)}, now(), now(), now());`);
 }
