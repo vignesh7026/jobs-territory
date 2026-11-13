@@ -4,14 +4,14 @@ const base = process.argv[2] || 'http://localhost:3200';
 
 // 1. light by default even when the system prefers dark, and the new fonts are in use
 const l = await launch({ out: process.env.TEMP || '.', base });
-await l.js(`localStorage.removeItem('theme')`);
+await l.js(`localStorage.removeItem('theme-v2')`);
 await l.emulate([{ name: 'prefers-color-scheme', value: 'dark' }]);
 await l.goto('/jobs', 3000);
 check('light theme by default even if the system is dark', !(await l.js(`document.documentElement.classList.contains('dark')`)));
 check('headings use Newsreader', /Newsreader/i.test(await l.js(`getComputedStyle(document.querySelector('h1')).fontFamily`)), await l.js(`getComputedStyle(document.querySelector('h1')).fontFamily`));
 check('body uses IBM Plex Sans', /Plex/i.test(await l.js(`getComputedStyle(document.body).fontFamily`)), await l.js(`getComputedStyle(document.body).fontFamily`));
 check('more data: many jobs listed', /1\d\d jobs|\d{3} jobs/i.test(await l.text('main')) || (await l.text('main')).includes('128'), (await l.text('main')).slice(0, 120));
-await l.js(`localStorage.setItem('theme','dark')`);
+await l.js(`localStorage.setItem('theme-v2','dark')`);
 await l.goto('/jobs', 2000);
 check('dark still works when chosen', await l.js(`document.documentElement.classList.contains('dark')`));
 l.close();

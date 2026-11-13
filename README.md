@@ -144,7 +144,7 @@ skills proposed from a voice transcript are filtered to those actually spoken.
 - The reply-time and market-range figures are only as good as the number of listings and applications on this site, and say so.
 - Anonymous applying hides structured fields; free text (a cover note, role descriptions) can still identify someone, and
   one global admin role means no per-company reviewer scoping.
-- Resume reading is rule-based: it handles PDFs with a text layer (not scans) and misses unusual layouts, so the profile page asks you to review. Word files are not accepted yet.
+- Resume reading uses pdf.js (via the `unpdf` package) to get accurate text from real-world PDFs, then rules to find fields. It handles PDFs with a text layer (not scans) and can still misread unusual layouts, so review the filled profile. Word files are not accepted yet.
 - The profile-vs-job score compares texts by rules; it is not a prediction of whether you will be hired.
 - Speech recognition uses the browser's own service and is untested in CI (no microphone in headless Edge).
 - GitHub's anonymous rate limit (60 requests an hour per server address) can block portfolio scans on a busy deployment.

@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   if (before?.resume_path) await supabase.storage.from(BUCKET).remove([before.resume_path]);
 
   // Read the resume so the profile can fill itself in. A resume that cannot be read (a scan, say) is still stored.
-  const read = readResume(bytes, file.name);
+  const read = await readResume(bytes, file.name);
   return NextResponse.json({
     path,
     name: displayName(path),

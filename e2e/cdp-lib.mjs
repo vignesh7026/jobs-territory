@@ -28,7 +28,7 @@ export async function launch({ out, base, w = 1360, h = 800, theme = 'light' }) 
     async shot(name, full = false) { const r = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: full }); fs.writeFileSync(out + '/' + name + '.png', Buffer.from(r.data, 'base64')); },
     async setFiles(sel, files) { const { root } = await send('DOM.getDocument'); const { nodeId } = await send('DOM.querySelector', { nodeId: root.nodeId, selector: sel }); await send('DOM.setFileInputFiles', { files, nodeId }); },
     async emulate(features) { await send('Emulation.setEmulatedMedia', { features }); },
-    async setTheme(t) { await api.js(`localStorage.setItem('theme', '${t}')`); },
+    async setTheme(t) { await api.js(`localStorage.setItem('theme-v2', '${t}')`); },
     close() { proc.kill(); ws.close(); },
   };
   await api.goto('/', 500); await api.setTheme(theme);
